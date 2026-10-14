@@ -60,13 +60,13 @@ function markKnockout(ink) {
 const TEXT = (ink) => `
   <text x="250" y="445" font-family="system-ui, -apple-system, sans-serif"
         font-weight="800" font-size="38" fill="${ink}" text-anchor="middle"
-        letter-spacing="1">Solid<tspan fill="#673ab8">MVC</tspan></text>
+        letter-spacing="1">Solid<tspan fill="#2c4f7c">MVC</tspan></text>
   <text x="250" y="480" font-family="system-ui, -apple-system, sans-serif"
         font-weight="600" font-size="14" fill="${ink}" text-anchor="middle"
         letter-spacing="3">ANGULAR-STYLE MVC ON SOLID</text>`;
 
 // ── variants ────────────────────────────────────────────────────────────
-const PURPLE = '#673ab8';
+const NAVY = '#2c4f7c';
 const ORBIT = '#ffffff';
 
 const svg = (viewBox, body) =>
@@ -79,35 +79,35 @@ const themed = (bg0, bg1, ink, viewBox = '0 0 500 550') =>
   <defs><radialGradient id="bg" cx="50%" cy="45%" r="75%">
     <stop offset="0%" stop-color="${bg0}"/><stop offset="100%" stop-color="${bg1}"/>
   </radialGradient></defs>
-  <rect width="500" height="550" fill="url(#bg)"/>${mark(PURPLE, ORBIT)}${TEXT(ink)}`
+  <rect width="500" height="550" fill="url(#bg)"/>${mark(NAVY, ORBIT)}${TEXT(ink)}`
   );
 
-// full logo — lavender wash / deep violet panel, brand purple shield
-writeFileSync(join(here, 'solidmvc-light.svg'), themed('#f2edfc', '#dcd0f5', '#3c1d95'));
-writeFileSync(join(here, 'solidmvc-dark.svg'), themed('#2e1a5e', '#150a33', '#e6ddff'));
+// full logo — ice-blue wash / deep navy panel, brand navy shield
+writeFileSync(join(here, 'solidmvc-light.svg'), themed('#eaf3fb', '#d0e3f4', '#1c3a5c'));
+writeFileSync(join(here, 'solidmvc-dark.svg'), themed('#1b3452', '#0d1f33', '#dcebf8'));
 
 // transparent full logo — mark + wordmark, no panel (for themed pages)
 writeFileSync(
   join(here, 'solidmvc-light-t.svg'),
-  svg('0 0 500 550', mark(PURPLE, ORBIT) + TEXT('#3c1d95'))
+  svg('0 0 500 550', mark(NAVY, ORBIT) + TEXT('#1c3a5c'))
 );
 writeFileSync(
   join(here, 'solidmvc-dark-t.svg'),
-  svg('0 0 500 550', mark(PURPLE, ORBIT) + TEXT('#e6ddff'))
+  svg('0 0 500 550', mark(NAVY, ORBIT) + TEXT('#dcebf8'))
 );
 
 // compact — artwork region only, square crop with even margins (shield
 // bounds x133–367 / y84.75–365.25 on the canvas, center 250,225)
-writeFileSync(join(here, 'solidmvc-compact-light.svg'), themed('#f2edfc', '#dcd0f5', '#3c1d95', '80 55 340 340'));
-writeFileSync(join(here, 'solidmvc-compact-dark.svg'), themed('#2e1a5e', '#150a33', '#e6ddff', '80 55 340 340'));
+writeFileSync(join(here, 'solidmvc-compact-light.svg'), themed('#eaf3fb', '#d0e3f4', '#1c3a5c', '80 55 340 340'));
+writeFileSync(join(here, 'solidmvc-compact-dark.svg'), themed('#1b3452', '#0d1f33', '#dcebf8', '80 55 340 340'));
 
 // favicon — mark only, no text, tight 1:1 square bounding the shield.
 // The orbit is transparent (knock-out) so a single file works on light
 // and dark browser chrome alike. `-white` is for brand-colored bars
-// (the orbit shows the bar's purple through).
+// (the orbit shows the bar's navy through).
 writeFileSync(
   join(here, 'solidmvc-icon.svg'),
-  svg('100 75 300 300', markKnockout(PURPLE))
+  svg('100 75 300 300', markKnockout(NAVY))
 );
 writeFileSync(
   join(here, 'solidmvc-icon-white.svg'),
@@ -120,15 +120,15 @@ const horizontal = (ink) =>
     '0 0 580 200',
     `
   <g transform="translate(${90 - 250 * 0.58} ${100 - 225 * 0.58}) scale(0.58)">
-${mark(PURPLE, ORBIT)}
+${mark(NAVY, ORBIT)}
   </g>
   <text x="200" y="115" font-family="system-ui, -apple-system, sans-serif"
-        font-weight="800" font-size="58" fill="${ink}" letter-spacing="1">Solid<tspan fill="${PURPLE}">MVC</tspan></text>
+        font-weight="800" font-size="58" fill="${ink}" letter-spacing="1">Solid<tspan fill="${NAVY}">MVC</tspan></text>
   <text x="203" y="152" font-family="system-ui, -apple-system, sans-serif"
         font-weight="600" font-size="17" fill="${ink}" letter-spacing="2.6">ANGULAR-STYLE MVC ON SOLID</text>`
   );
-writeFileSync(join(here, 'solidmvc-horizontal-light.svg'), horizontal('#3c1d95'));
-writeFileSync(join(here, 'solidmvc-horizontal-dark.svg'), horizontal('#e6ddff'));
+writeFileSync(join(here, 'solidmvc-horizontal-light.svg'), horizontal('#1c3a5c'));
+writeFileSync(join(here, 'solidmvc-horizontal-dark.svg'), horizontal('#dcebf8'));
 
 // brand lockup — mark + wordmark sized so the text fills the icon's height.
 const brand = (ink) =>
@@ -136,15 +136,15 @@ const brand = (ink) =>
     '0 8 780 240',
     `
   <g transform="translate(${100 - 250 * 0.62} ${128 - 225 * 0.62}) scale(0.62)">
-${mark(PURPLE, ORBIT)}
+${mark(NAVY, ORBIT)}
   </g>
   <text x="212" y="172" font-family="system-ui, -apple-system, sans-serif"
-        font-weight="800" font-size="96" fill="${ink}" letter-spacing="1">Solid<tspan fill="${PURPLE}">MVC</tspan></text>
+        font-weight="800" font-size="96" fill="${ink}" letter-spacing="1">Solid<tspan fill="${NAVY}">MVC</tspan></text>
   <text x="216" y="225" font-family="system-ui, -apple-system, sans-serif"
         font-weight="600" font-size="30" fill="${ink}" letter-spacing="2.4">ANGULAR-STYLE MVC ON SOLID</text>`
   );
-writeFileSync(join(here, 'solidmvc-brand-light.svg'), brand('#3c1d95'));
-writeFileSync(join(here, 'solidmvc-brand-dark.svg'), brand('#e6ddff'));
+writeFileSync(join(here, 'solidmvc-brand-light.svg'), brand('#1c3a5c'));
+writeFileSync(join(here, 'solidmvc-brand-dark.svg'), brand('#dcebf8'));
 
 // social card — 1200×630 og:image. Dark panel + brand lockup centered;
 // rasterize with --window-size=1200,630 (the opaque dark panel reads on
@@ -155,17 +155,17 @@ writeFileSync(
     '0 0 1200 630',
     `
   <defs><radialGradient id="bg" cx="50%" cy="45%" r="75%">
-    <stop offset="0%" stop-color="#2e1a5e"/><stop offset="100%" stop-color="#150a33"/>
+    <stop offset="0%" stop-color="#1b3452"/><stop offset="100%" stop-color="#0d1f33"/>
   </radialGradient></defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
   <g transform="translate(100.8 151.2) scale(1.28)">
     <g transform="translate(${100 - 250 * 0.62} ${128 - 225 * 0.62}) scale(0.62)">
-${mark(PURPLE, ORBIT)}
+${mark(NAVY, ORBIT)}
     </g>
     <text x="212" y="172" font-family="system-ui, -apple-system, sans-serif"
-          font-weight="800" font-size="96" fill="#e6ddff" letter-spacing="1">Solid<tspan fill="${PURPLE}">MVC</tspan></text>
+          font-weight="800" font-size="96" fill="#dcebf8" letter-spacing="1">Solid<tspan fill="${NAVY}">MVC</tspan></text>
     <text x="216" y="225" font-family="system-ui, -apple-system, sans-serif"
-          font-weight="600" font-size="30" fill="#e6ddff" letter-spacing="2.4">ANGULAR-STYLE MVC ON SOLID</text>
+          font-weight="600" font-size="30" fill="#dcebf8" letter-spacing="2.4">ANGULAR-STYLE MVC ON SOLID</text>
   </g>`,
   ),
 );

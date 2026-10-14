@@ -102,6 +102,23 @@ the same dist works at any mount depth.
   pinned to a deterministic port in `examples/enterprise/vite.config.ts`)
 - prod: `./<mount>/` (the assembled Pages tree)
 
+## Brand palette
+
+Both surfaces are skinned on the Solid site palette (solidjs.com):
+
+- brand navy `#2c4f7c` (`--accent`/`--brand` in light mode, header bar,
+  theme-color meta, the logo shield)
+- light blue `#76b3e1` (dark-mode accent, swoosh/`MVC` tspan on dark)
+- mid blue `#4f87c7` (hover/link-ink accents, worker-side code tint)
+- panels `#1b3452`→`#0d1f33` dark radial, `#eaf3fb`→`#d0e3f4` light wash
+
+The CSS vars live in `docs-consumer/src/styles.css` and the inline
+`<style>` in `pages-landing/index.html`/`404.html`. Logo and card art
+derive from `assets/build-logo.mjs` (`NAVY` const) plus the hand-authored
+`solidmvc-convergence.svg`; PNGs are rasterized from the SVGs via
+headless Edge, then copied to `pages-landing/`, `public/`, and
+`docs-consumer/public/` (regenerate, never hand-edit the copies).
+
 ## Deploy
 
 `pages.yml` runs on `workflow_dispatch` or `workflow_call` (publish.yml's

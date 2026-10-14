@@ -4,17 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SolidMVC — page not found</title>
+    <meta name="color-scheme" content="dark light" />
     <style>
+      :root {
+        color-scheme: light;
+        --bg: #ffffff; --text: #444444; --heading: #000000; --muted: #777777;
+        --accent: #2c4f7c; --code-bg: #f4f4f4; --code-border: #e5e5e5;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+          --bg: #242424; --text: #cccccc; --heading: #ffffff; --muted: #999999;
+          --accent: #76b3e1; --code-bg: #1c2027; --code-border: #3f3f3f;
+        }
+      }
       body {
         margin: 0; min-height: 100vh; display: grid; place-items: center;
-        background: #0d1017; color: #e8eaf6;
+        background: var(--bg); color: var(--text);
         font-family: 'Segoe UI', system-ui, sans-serif;
       }
       main { text-align: center; max-width: 480px; padding: 24px; }
-      h1 { font-size: 2rem; margin-bottom: 8px; }
-      p { color: #8a90b8; line-height: 1.6; }
-      a { color: #8b9cf9; }
-      code { background: #171c28; border: 1px solid #2a3350; border-radius: 4px; padding: 1px 6px; font-size: .9em; }
+      h1 { font-size: 2rem; margin-bottom: 8px; color: var(--heading); }
+      p { color: var(--muted); line-height: 1.6; }
+      a { color: var(--accent); }
+      code { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 6px; font-size: .9em; color: var(--text); }
     </style>
     <script>
       // SPA deep-link shim: a miss under /docs/<app>/<rest> is probably a

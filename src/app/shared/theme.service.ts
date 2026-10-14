@@ -2,12 +2,12 @@ import { Injectable, inject, signal, effect, DestroyRef } from '@solid-mvc/core'
 
 export type Theme = 'light' | 'dark' | 'system';
 
-const KEY = 'pmvc-theme';
+const KEY = 'smvc-theme';
 
 @Injectable()
 export class ThemeService {
   /** Demo accent — HelloView reads it to show module-provided theming. */
-  accent = '#673ab8';
+  accent = '#2c4f7c';
   headingStyle = { color: this.accent };
 
   theme = signal<Theme>((localStorage.getItem(KEY) as Theme) ?? 'system');

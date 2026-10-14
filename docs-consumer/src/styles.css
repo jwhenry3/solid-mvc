@@ -11,14 +11,14 @@
   --bodytext: #444444;
   --heading: #000000;
   --muted: #777777;
-  --accent: #673ab8;
-  --btn: #673ab8;
+  --accent: #2c4f7c;
+  --btn: #2c4f7c;
   --code-bg: #101725;
   --code-inline: #e4e4e4;
   --quote-bg: #ebf6ff;
-  --quote-border: #5aa8ff;
-  --side-worker-ink: #8f61e1;
-  --side-worker-tint: rgba(103, 58, 184, 0.06);
+  --quote-border: #4f87c7;
+  --side-worker-ink: #4f87c7;
+  --side-worker-tint: rgba(44, 79, 124, 0.07);
   font-family: system-ui, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
@@ -34,13 +34,13 @@
     --bodytext: #cccccc;
     --heading: #ffffff;
     --muted: #999999;
-    --accent: #ae80ff;
+    --accent: #76b3e1;
     --code-bg: #1c2027;
     --code-inline: #404040;
     --quote-bg: #152038;
-    --quote-border: #1069cc;
-    --side-worker-ink: #ae80ff;
-    --side-worker-tint: rgba(174, 128, 255, 0.09);
+    --quote-border: #4f87c7;
+    --side-worker-ink: #76b3e1;
+    --side-worker-tint: rgba(118, 179, 225, 0.09);
   }
 }
 
