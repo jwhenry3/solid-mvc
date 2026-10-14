@@ -14,6 +14,16 @@ describe('signals primitives', () => {
     expect(sum.value).toBe(30);
     expect(untracked(() => a.value)).toBe(10);
   });
+
+  it('peek reads without subscribing the surrounding computation', () => {
+    const s = signal(0);
+    const m = computed(() => s.value * 2);
+    expect(s.peek()).toBe(0);
+    expect(m.peek()).toBe(0);
+    s.value = 3;
+    expect(s.peek()).toBe(3);
+    expect(m.peek()).toBe(6);
+  });
 });
 
 describe('effect', () => {

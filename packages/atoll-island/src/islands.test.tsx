@@ -15,11 +15,12 @@ import { render } from 'solid-js/web';
 import { fireEvent } from '@solidjs/testing-library';
 import { InProcessWorker } from '@atolljs/core/testing/inProcessWorker';
 import { definePolyWorker } from '@solid-mvc/atoll/worker';
-import { defineViewPolyWorker, defineViewMonoWorker, viewIsland } from './adapter';
+import { defineViewPolyWorker, defineViewMonoWorker, viewIsland, viewIslandApp } from './adapter';
 import {
   callbackProp,
   connectIslandWorker,
   defineIslandContract,
+  islandApp,
   mountIsland,
   z,
 } from '@solid-mvc/atoll';
@@ -31,6 +32,7 @@ import {
   GreetIsland,
   LeaveIsland,
   SvgIsland,
+  SpreadIsland,
   tick,
   leaves,
 } from './islands-test.worker';
@@ -95,6 +97,7 @@ beforeEach(() => {
       greet: GreetIsland,
       leave: LeaveIsland,
       svg: SvgIsland,
+      spread: SpreadIsland,
       stamp: {
         imperative: (doc, props) => {
           const d = doc.createElement('div');
@@ -173,6 +176,28 @@ describe('islands', () => {
     expect(svg.querySelector('circle')!.namespaceURI).toBe('http://www.w3.org/2000/svg');
     expect(svg.querySelector('path')!.namespaceURI).toBe('http://www.w3.org/2000/svg');
     island.destroy();
+  });
+
+  it('spread props enumerate the props proxy (ownKeys + descriptors)', async () => {
+    const island = await mountInto(def, {
+      app: 'spread',
+      props: { title: 'hi', 'data-x': '7' },
+    });
+    const el = document.querySelector('.spread')!;
+    expect(el.getAttribute('title')).toBe('hi');
+    expect(el.getAttribute('data-x')).toBe('7');
+    island.destroy();
+  });
+
+  it('viewIslandApp propagates an explicit islandApp stamp', async () => {
+    // A component stamped BEFORE wrapping keeps its registry name on the
+    // wrapper — bare refs don't mint one (bundle-suffixed .name would
+    // never match the registry key).
+    const stamped = viewIslandApp(islandApp('stamped-name', CounterIsland));
+    expect((stamped as { islandAppName?: string }).islandAppName).toBe('stamped-name');
+    // islandApp mutates the class — use a different ref for the bare case.
+    const bare = viewIslandApp(TickerIsland);
+    expect((bare as { islandAppName?: string }).islandAppName).toBeUndefined();
   });
 
   it('multi-word events (onMouseLeave) dispatch to the worker', async () => {

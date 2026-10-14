@@ -82,6 +82,15 @@ export class SvgIsland extends View {
   }
 }
 
+// Spreading this.props exercises the props proxy's ownKeys +
+// getOwnPropertyDescriptor traps — Solid's spread() enumerates them.
+@Component()
+export class SpreadIsland extends View<Record<string, unknown>> {
+  render() {
+    return <div class="spread" {...this.props} />;
+  }
+}
+
 @Injectable()
 export class IslandGreeter {
   hi(n: string) {

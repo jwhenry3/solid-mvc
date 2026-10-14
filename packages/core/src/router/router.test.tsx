@@ -4,6 +4,7 @@ import { Injector } from '../injector';
 import { inject } from '../injector';
 import { InjectorContext } from '../context';
 import { Router, ROUTES } from './router';
+import { createRoot } from 'solid-js';
 import { RouterModule, routeComponent } from './module';
 import { RouterOutlet } from './outlet';
 import { Link } from './link';
@@ -11,6 +12,7 @@ import { createModuleInjector } from '../module';
 import { Module } from '../decorators';
 import { View } from '../view';
 import type { Route } from './router';
+import type { Location as RouterLocation } from '@solidjs/router';
 
 afterEach(() => cleanup());
 
@@ -185,6 +187,23 @@ describe('navigation', () => {
     window.dispatchEvent(new PopStateEvent('popstate'));
     expect(r.url.value).toBe('/user/9');
   });
+
+  it('stops syncing popstate after onDestroy', () => {
+    history.pushState(null, '', '/');
+    const r = makeRouter();
+    r.onDestroy();
+    history.pushState(null, '', '/user/9');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    expect(r.url.value).not.toBe('/user/9');
+    history.pushState(null, '', '/');
+  });
+
+  it('isActive compares the url signal', () => {
+    const r = makeRouter();
+    r.url.value = '/user/3';
+    expect(r.isActive('/user/3')).toBe(true);
+    expect(r.isActive('/')).toBe(false);
+  });
 });
 
 describe('RouterOutlet', () => {
@@ -243,6 +262,27 @@ describe('RouterOutlet', () => {
     const match = { route: { path: '/x', component: C } };
     expect(routeComponent(match)).toBe(C);
   });
+
+  it('routeComponent returns null for grouping routes and module-less modules', () => {
+    // A route with neither component nor module renders its children only.
+    expect(routeComponent({ route: { path: '/g' } })).toBeNull();
+    // A module route whose module declares no bootstrap resolves null too.
+    class Empty {}
+    expect(routeComponent({ route: { path: '/m', module: Empty } })).toBeNull();
+  });
+
+  it('grouping routes pass their matched children straight through', async () => {
+    const grouped: Route[] = [
+      {
+        path: '/wrap',
+        children: [{ path: 'leaf', component: () => <p>leaf content</p> }],
+      },
+      { path: '*', component: () => <p>not found</p> },
+    ];
+    const M = RouterModule.forRoot(grouped, { basePath: '/' });
+    outletWith(M, '/wrap/leaf');
+    expect(await screen.findByText('leaf content')).toBeTruthy();
+  });
 });
 
 describe('base path', () => {
@@ -292,6 +332,54 @@ describe('base path', () => {
   });
 });
 
+describe('RouterOutlet edge cases', () => {
+  it('nested outlet without OutletChildren context renders null', async () => {
+    const { OutletDepth } = await import('./outlet');
+    render(() => (
+      <OutletDepth.Provider value={1}>
+        <RouterOutlet />
+      </OutletDepth.Provider>
+    ));
+    // No OutletChildren provider above depth-1: child?.() ?? null.
+    expect(document.body.textContent).not.toContain('user');
+  });
+});
+
+describe('attachRouter', () => {
+  it('maps wire matches without ROUTE_INFO_KEY to a route stub', async () => {
+    const r = makeRouter();
+    // Wire matches from a @solidjs/router tree that didn't come through
+    // toRouteDef carry no info stamp — the fallback keeps originalPath.
+    createRoot((dispose) => {
+      r.attachRouter(
+        () => {},
+        { pathname: '/x', search: '' } as RouterLocation,
+        () => [{ route: { originalPath: '/x' } as any, params: { id: '5' }, path: '/x' }],
+      );
+      return dispose;
+    });
+    await settle();
+    expect(r.matches.value?.[0].route.path).toBe('/x');
+    expect(r.matches.value?.[0].params).toEqual({ id: '5' });
+  });
+
+  it('keeps the raw param when percent-decoding throws', async () => {
+    const r = makeRouter();
+    // Lone trailing % is not a valid escape — decodeURIComponent throws
+    // and decodeParams falls back to the raw segment.
+    createRoot((dispose) => {
+      r.attachRouter(
+        () => {},
+        { pathname: '/x', search: '' } as RouterLocation,
+        () => [{ route: { originalPath: '/x' } as any, params: { id: 'a%' }, path: '/x' }],
+      );
+      return dispose;
+    });
+    await settle();
+    expect(r.matches.value?.[0].params.id).toBe('a%');
+  });
+});
+
 describe('Link', () => {
   it('navigates without a page reload on click', async () => {
     const M = RouterModule.forRoot(routes, { basePath: '/' });
@@ -312,5 +400,27 @@ describe('Link', () => {
     expect(router.url.value).toBe('/user/1');
     expect(location.pathname).toBe('/user/1');
     expect(await screen.findByText('user')).toBeTruthy();
+  });
+
+  it('ignores modified/non-primary clicks and honors onClick preventDefault', async () => {
+    const M = RouterModule.forRoot(routes, { basePath: '/' });
+    const root = new Injector();
+    const inj = createModuleInjector(M, root);
+    const router = inj.get(Router);
+    router.url.value = '/';
+    render(() => (
+      <InjectorContext.Provider value={inj}>
+        <Link to="/user/1" onClick={(e) => e.preventDefault()}>guarded</Link>
+        <Link to="/user/2">plain</Link>
+      </InjectorContext.Provider>
+    ));
+    // onClick that prevents default → no navigation.
+    fireEvent.click(screen.getByText('guarded'));
+    await settle();
+    expect(router.url.value).not.toBe('/user/1');
+    // Modified click → browser handles it, router stays put.
+    fireEvent.click(screen.getByText('plain'), { ctrlKey: true });
+    await settle();
+    expect(router.url.value).not.toBe('/user/2');
   });
 });

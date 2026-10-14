@@ -149,6 +149,13 @@ describe('Injector', () => {
     expect(child.has(Service)).toBe(true);
     expect(child.has(InjectionToken)).toBe(false);
   });
+
+  it('has() treats controller tokens as always resolvable (transient)', () => {
+    class Ctrl {
+      static __controller = true;
+    }
+    expect(new Injector().has(Ctrl)).toBe(true);
+  });
 });
 
 describe('scope lifecycle', () => {

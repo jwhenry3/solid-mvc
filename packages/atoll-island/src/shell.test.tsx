@@ -105,6 +105,37 @@ describe('shell', () => {
     );
   });
 
+  it('applies an object style prop to the mount element', async () => {
+    const { container, dispose } = await renderInto(
+      <Island
+        app="counter"
+        worker={workerEntry}
+        style={{ paddingLeft: '4px', opacity: 0.5 }}
+      />,
+    );
+    await vi.waitFor(() => expect(container.querySelector('.inc')).not.toBeNull());
+    expect(container.firstElementChild!.getAttribute('style')).toBe(
+      'padding-left:4px;opacity:0.5',
+    );
+    dispose();
+  });
+
+  it('lazyIsland unmounted before the module resolves does not mount late', async () => {
+    let release!: (v: unknown) => void;
+    const gate = new Promise((r) => {
+      release = r;
+    });
+    const Lazy = lazyIsland(() => gate as Promise<Record<string, unknown>>);
+    const { container, dispose } = await renderInto(
+      <Lazy worker={workerEntry} fallback={<span class="loading">…</span>} />,
+    );
+    dispose();
+    release({ default: { not: 'an island' } });
+    await flush();
+    // live=false swallowed the resolution — no mount, no error box.
+    expect(container.children.length).toBe(0);
+  });
+
   it('lazyIsland renders the fallback until the module resolves, then mounts', async () => {
     const contract = defineIslandContract({
       app: 'counter',

@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { Injector } from './injector';
 import { Module, ownerOf } from './decorators';
-import { createModuleInjector, getModuleInjector, getModuleMeta } from './module';
+import { bootstrap, createModuleInjector, getModuleInjector, getModuleMeta } from './module';
 import { View } from './view';
 
 class Shared {}
@@ -71,6 +71,20 @@ describe('module injectors', () => {
     expect(() => createModuleInjector(class {}, new Injector())).toThrow(/not a module/);
   });
 
+  it('throws when an imported member lacks module metadata', () => {
+    @Module({ imports: [class Plain {}] })
+    class Bad {}
+    expect(() => createModuleInjector(Bad, new Injector())).toThrow(/not a module/);
+  });
+
+  it('bootstrap throws when the root module declares no bootstrap component', () => {
+    @Module({ providers: [] })
+    class NoBoot {}
+    expect(() => bootstrap(NoBoot, document.createElement('div'))).toThrow(
+      /must declare a bootstrap component/,
+    );
+  });
+
   it('exposes module metadata', () => {
     expect(getModuleMeta(FeatureMod)?.providers).toContain(ServiceA);
   });
@@ -102,5 +116,26 @@ describe('component ownership', () => {
       }
     }
     expect(ownerOf(Free)).toBeUndefined();
+  });
+
+  it('warns and keeps the first owner when two modules declare one view', () => {
+    class SharedView extends View {
+      render() {
+        return null;
+      }
+    }
+    @Module({ components: [SharedView] })
+    class FirstMod {}
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      @Module({ components: [SharedView] })
+      class SecondMod {}
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('declared by both'),
+      );
+      expect(ownerOf(SharedView)).toBe(FirstMod);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
