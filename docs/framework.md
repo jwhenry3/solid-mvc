@@ -91,8 +91,9 @@ construction).
 - Lifecycle: `onInit`/`onDestroy` on views and injected controllers run on
   injector activate/deactivate; deactivate disposes the Solid owner, so
   cleanups pair correctly even on same-tick mount+unmount.
-- `setState`/`forceUpdate` on a View throw intentionally; refs on views
-  throw. State lives in signals.
+- Views carry no mutation API — there is no `setState`/`forceUpdate`;
+  state lives in signals, and `render()` runs once per mount while JSX
+  accessors re-evaluate under Solid's tracking.
 - **Error boundary**: each host wraps the view in Solid `ErrorBoundary` —
   mount/render failures render a fallback box (with Retry) instead of
   taking down the whole tree.

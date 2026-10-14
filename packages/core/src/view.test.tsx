@@ -25,7 +25,7 @@ class Greeting extends View {
 }
 
 describe('class-based views', () => {
-  it('renders a View subclass anywhere a vnode can appear', () => {
+  it('renders a View subclass anywhere JSX can appear', () => {
     mount(() => <Greeting />);
     expect(screen.getByText('hello from class view')).toBeTruthy();
   });

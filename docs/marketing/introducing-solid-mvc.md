@@ -34,7 +34,7 @@ Scaffold an app: `npm install -g @solid-mvc/cli && smvc new my-app`
 ## Teaser variant (short post)
 
 Angular's architecture on Solid: modules, hierarchical DI, and class
-views rendered as plain vnodes, signals instead of change detection,
+views rendered as plain JSX elements, signals instead of change detection,
 structure enforced only where you declare it, and the whole Solid
 ecosystem unchanged.
 

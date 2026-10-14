@@ -148,8 +148,9 @@ Rules:
   `effect`/`memo`/`createComponent` surface, and `createComponent` routes
   View classes through `viewComponent()` exactly like the DOM runtime.
   `setProperty` handles `on*` props by attaching real listeners with the
-  lowercase DOM type — universal output never hits the `'onclick' in el`
-  probe problem Preact had, so no event-name bridge is needed.
+  lowercase DOM type — compiled output hands them over as event props, so
+  the `'onclick' in el` probe that pushes DOM renderers onto an
+  event-name bridge never applies here.
 - **`sync` lane** (`adapter.ts`): rendered handles may provide `sync(fn)`;
   the dispatch task runs the event handler inside the instance scope.
   Solid flushes signal effects synchronously, so handler-driven DOM writes
@@ -331,7 +332,8 @@ in-process caveats:
   island packages.
 - **No event-name bridge needed**: the universal renderer's `setProperty`
   receives `on*` props already split, so listeners attach with real DOM
-  types — Preact's `'on*' in el` probe problem doesn't exist here.
+  types — the `'on*' in el` probe problem DOM-side renderers hit on the
+  proxy DOM doesn't exist here.
 
 ## Invariants
 

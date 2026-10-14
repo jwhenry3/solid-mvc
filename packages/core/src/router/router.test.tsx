@@ -155,9 +155,9 @@ describe('navigation', () => {
   });
 
   it('intercepts plain <a href> clicks anywhere in the document', async () => {
-    // The router owns the link-interception preact-router used to provide:
-    // unmodified same-origin anchors navigate in-app without a reload —
-    // including anchors the framework didn't render.
+    // @solidjs/router installs a document-level interceptor: unmodified
+    // same-origin anchors navigate in-app without a reload — including
+    // anchors the framework didn't render.
     const M = RouterModule.forRoot(routes, { basePath: '/' });
     const root = new Injector();
     const inj = createModuleInjector(M, root);
