@@ -1,5 +1,5 @@
 /**
- * `pmvc new <dir>` — scaffold a PreactMVC application, the `ng new`
+ * `pmvc new <dir>` — scaffold a SolidMVC application, the `ng new`
  * equivalent. Flags: --islands, --tailwind, --skip-install,
  * --skip-tests, -d/--dry-run, --force (overwrite existing files).
  */
@@ -19,7 +19,7 @@ import * as T from '../templates.mjs';
 export function cmdNew(argv) {
   const a = argv; // pre-parsed by cli.mjs
   const dir = a._[0];
-  if (!dir) fail('usage: pmvc new <directory> [--islands] [--tailwind] [--skip-install]');
+  if (!dir) fail('usage: smvc new <directory> [--islands] [--tailwind] [--skip-install]');
   const name = toKebab(dir.split(/[\\/]/).pop());
   const root = resolve(dir);
   const opts = {
@@ -32,13 +32,16 @@ export function cmdNew(argv) {
 
   const fw = frameworkRange();
   const dependencies = {
-    '@preact-mvc/core': fw,
-    preact: VERSIONS.preact,
-    '@preact/signals': VERSIONS['@preact/signals'],
+    '@solid-mvc/core': fw,
+    'solid-js': VERSIONS['solid-js'],
   };
   const devDependencies = {
-    '@preact/preset-vite': VERSIONS['@preact/preset-vite'],
-    '@testing-library/preact': VERSIONS['@testing-library/preact'],
+    'vite-plugin-solid': VERSIONS['vite-plugin-solid'],
+    '@babel/core': VERSIONS['@babel/core'],
+    '@babel/plugin-proposal-decorators': VERSIONS['@babel/plugin-proposal-decorators'],
+    '@babel/plugin-transform-class-properties':
+      VERSIONS['@babel/plugin-transform-class-properties'],
+    '@solidjs/testing-library': VERSIONS['@solidjs/testing-library'],
     '@types/node': VERSIONS['@types/node'],
     jsdom: VERSIONS.jsdom,
     typescript: VERSIONS.typescript,
@@ -46,8 +49,8 @@ export function cmdNew(argv) {
     vitest: VERSIONS.vitest,
   };
   if (islands) {
-    dependencies['@preact-mvc/atoll'] = fw;
-    dependencies['@preact-mvc/atoll-island'] = fw;
+    dependencies['@solid-mvc/atoll'] = fw;
+    dependencies['@solid-mvc/atoll-island'] = fw;
     dependencies['@atolljs/core'] = VERSIONS['@atolljs/core'];
   }
   if (tailwind) {
@@ -80,10 +83,20 @@ export function cmdNew(argv) {
     NAME: name,
     TITLE: name,
     TAILWIND_IMPORT: tailwind ? "import tailwindcss from '@tailwindcss/vite';\n" : '',
-    TAILWIND_PLUGIN: tailwind ? ', tailwindcss()' : '',
+    TAILWIND_PLUGIN: tailwind ? 'tailwindcss(),' : '',
     ISLANDS_IMPORT: islands
       ? "import { TickerDemoView } from './island-demo/island-demo.view';\n"
       : '',
+    ISLANDS_VITE_IMPORT: islands
+      ? "import { WORKER_FILES, workerUniversalTag } from '@solid-mvc/atoll-island/vite';\n"
+      : '',
+    // In dev a worker entry arrives as a ?worker_file URL and its whole
+    // import graph must compile universal — workerUniversalTag stamps
+    // ?smvc-worker onto every reachable id, which WORKER_FILES matches.
+    WORKER_FILES: islands
+      ? ''
+      : 'const WORKER_FILES = [/\\.worker\\.[tj]sx?/, /\\.island\\.[tj]sx?/];',
+    ISLANDS_TAG: islands ? 'workerUniversalTag(),\n    ' : '',
     ISLANDS_ROUTE: islands ? "  { path: '/island', component: TickerDemoView },\n" : '',
     ISLANDS_NAV: islands ? "  { to: '/island', match: '/island', label: 'Island' },\n" : '',
     KEBAB: 'ticker',
@@ -119,7 +132,7 @@ export function cmdNew(argv) {
     );
   }
 
-  log(`\nScaffolding a PreactMVC app in ${root}\n`);
+  log(`\nScaffolding a SolidMVC app in ${root}\n`);
   for (const [rel, contents] of Object.entries(files)) {
     writeFile(root, rel, contents, opts);
   }
@@ -135,6 +148,6 @@ Done. Next:
 
   cd ${dir}
   ${a['skip-install'] ? 'npm install\n  ' : ''}pmvc serve       # start the dev server
-  pmvc g view my-page   # scaffold a new view
+  smvc g view my-page   # scaffold a new view
 `);
 }

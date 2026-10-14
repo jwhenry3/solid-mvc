@@ -1,5 +1,4 @@
-import { createContext } from 'preact';
-import { useContext, useMemo } from 'preact/hooks';
+import { createContext, useContext, createMemo } from 'solid-js';
 import hljs from '../hl';
 
 interface CodeBlockProps {
@@ -12,7 +11,7 @@ interface CodeBlockProps {
 export type CodeSide = 'worker' | 'shell' | 'app' | 'module';
 
 /** Page-level default for which side of the wire a snippet runs on. */
-export const CodeSideContext = createContext<CodeSide | undefined>(undefined);
+export const CodeSideContext = createContext<CodeSide | undefined>();
 
 const HTML_ENTITIES: Record<string, string> = {
   '&amp;': '&',
@@ -107,7 +106,7 @@ function highlightJsxExpressions(html: string, language: string): string {
 export function CodeBlock({ code, language = 'typescript', file, side }: CodeBlockProps) {
   const contextSide = useContext(CodeSideContext);
   const resolvedSide = side ?? contextSide;
-  const html = useMemo(() => {
+  const html = createMemo(() => {
     const trimmed = code.trim();
     if (!hljs.getLanguage(language)) {
       return trimmed.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -121,7 +120,7 @@ export function CodeBlock({ code, language = 'typescript', file, side }: CodeBlo
     const shielded = trimmed.replace(/=>/g, '=»');
     const highlighted = hljs.highlight(shielded, { language }).value;
     return highlightJsxExpressions(highlighted, 'typescript').replace(/»/g, '&gt;');
-  }, [code, language]);
+  });
   return (
     <figure class="code" data-side={resolvedSide}>
       {(file || resolvedSide) && (
@@ -131,7 +130,7 @@ export function CodeBlock({ code, language = 'typescript', file, side }: CodeBlo
         </figcaption>
       )}
       <pre class="hljs">
-        <code dangerouslySetInnerHTML={{ __html: html }} />
+        <code innerHTML={html()} />
       </pre>
     </figure>
   );

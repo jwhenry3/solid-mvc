@@ -23,7 +23,7 @@ export function GuideQuery() {
       <h2>Provide the QueryClient</h2>
       <CodeBlock
         file="lib/query.module.ts"
-        code={`import { QueryClient, type QueryClientConfig } from '@tanstack/preact-query';
+        code={`import { QueryClient, type QueryClientConfig } from '@tanstack/query-core';
 
 // "Library as a module" — the same pattern RouterModule.forRoot uses:
 // an object with __module metadata can sit in 'imports'.
@@ -44,15 +44,15 @@ export class QueryModule {
 
       <h2>Bridge QueryObserver into a signal</h2>
       <p>
-        <code>QueryObserver</code> is TanStack's headless core — no hooks
-        required, which is exactly what class views want:
+        <code>QueryObserver</code> is TanStack's headless core — no framework
+        binding required, which is exactly what class views want:
       </p>
       <CodeBlock
         file="lib/query.ts"
-        code={`import { signal, type Signal } from '@preact/signals';
-import { effect, getCurrentInjector, DestroyRef } from '@preact-mvc/core';
+        code={`import { signal, type Signal, effect,
+         getCurrentInjector, DestroyRef } from '@solid-mvc/core';
 import { QueryObserver, type QueryObserverOptions,
-         type QueryObserverResult } from '@tanstack/preact-query';
+         type QueryObserverResult } from '@tanstack/query-core';
 
 export function querySignal<TData, TError = Error>(
   client: QueryClient,
@@ -89,16 +89,23 @@ export class UsersView extends View {
   }));
 
   render() {
-    const res = this.users.value;         // QueryObserverResult<User[]>
-    if (res.isPending) return <Skeleton />;
-    const rows = res.data ?? [];
-    return <Table>{rows.map((u) => <TableRow key={u.id}>…</TableRow>)}</Table>;
+    // Reads stay inside JSX — the tracked spots update on every
+    // observer push; the render body itself runs once.
+    return (
+      <Show when={!this.users.value.isPending} fallback={<Skeleton />}>
+        <Table>
+          <For each={this.users.value.data ?? []}>
+            {(u) => <TableRow>…</TableRow>}
+          </For>
+        </Table>
+      </Show>
+    );
   }
 }`}
       />
       <p>
-        The result is a signal — <code>isPending</code>,{' '}
-        <code>isError</code>, <code>data</code> re-render the view as they
+        The result is a signal — JSX reads of <code>isPending</code>,{' '}
+        <code>isError</code>, <code>data</code> update the DOM as they
         change. Keys, caching, <code>invalidateQueries</code>, refetch,
         mutations — all standard TanStack semantics; the framework only owns
         the subscription boundary.

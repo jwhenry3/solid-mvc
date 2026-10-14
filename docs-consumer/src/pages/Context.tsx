@@ -4,24 +4,24 @@ import { docHref } from '../link';
 export function Context() {
   return (
     <article>
-      <h1>Context &amp; hooks</h1>
+      <h1>Context &amp; helpers</h1>
       <p class="lead">
         View classes inject at construction, but plain function components —
         reusable UI pieces, third-party wrappers — participate in the same
-        injector tree through <code>InjectorContext</code> and three hooks.
+        injector tree through <code>InjectorContext</code> and three helpers.
       </p>
 
       <h2>The plumbing</h2>
       <p>
         The framework's host wraps every mounted view in{' '}
         <code>InjectorContext.Provider</code> with that view's injector.
-        Function components read it with hooks — they're ordinary Preact
-        context hooks, so the rules of hooks apply (they're for function
-        components only, never <code>render()</code>):
+        Function components read it with <code>useContext</code> under the
+        hood — call them at component setup, not inside conditionals or
+        callbacks:
       </p>
       <CodeBlock
         language="tsx"
-        code={`import { useService, useController, useInjector, Provide } from '@preact-mvc/core';
+        code={`import { useService, useController, useInjector, Provide } from '@solid-mvc/core';
 import { ThemeService } from './theme.service';
 
 function ThemeBadge() {
@@ -32,7 +32,7 @@ function ThemeBadge() {
 
       <table class="doc-table">
         <thead>
-          <tr><th>Hook</th><th>Returns</th></tr>
+          <tr><th>Helper</th><th>Returns</th></tr>
         </thead>
         <tbody>
           <tr>

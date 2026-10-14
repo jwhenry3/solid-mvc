@@ -8,18 +8,18 @@ op stream the main-thread driver replays as real DOM mutations. Since the
 instance lifecycle, worker definers, task transport, and driver are
 `@atolljs/core` + `@atolljs/islands` code. Our packages are facades:
 
-- **`@preact-mvc/atoll`** (`packages/atoll`) — thin shell/worker facades
+- **`@solid-mvc/atoll`** (`packages/atoll`) — thin shell/worker facades
   over `@atolljs/islands`. `.` = shell/mount entry (`mountIsland`,
   `connectIslandWorker`, `callbackProp`, contracts, `z`), `./worker` =
   worker-side entry (`definePolyWorker`/`defineMonoWorker`, `emit`,
   instance scope, proxy-DOM types).
-- **`@preact-mvc/atoll-island`** (`packages/atoll-island`) — the
+- **`@solid-mvc/atoll-island`** (`packages/atoll-island`) — the
   `*-island` adapter package. `.` = shell surface (`<Island/>`,
   `islandComponent`, `lazyIsland`) plus re-exports of the driver/mount
-  API; `./worker` = the PreactMVC renderer (`viewIslandApp`,
+  API; `./worker` = the SolidMVC renderer (`viewIslandApp`,
   `viewIsland`, `defineViewPolyWorker`, `defineViewMonoWorker`) plus
   re-exports of `emit`/instance scope so worker entries need no direct
-  `@preact-mvc/atoll` import.
+  `@solid-mvc/atoll` import.
 
 ## Topology
 
@@ -56,9 +56,10 @@ main thread                          worker thread
 | `index.ts` | atoll | shell | re-exports `@atolljs/islands`: contracts (`defineIslandContract`, `withContract`, `contractOf`, `contractWorkerOf`), `islandApp`, `z`/`Schema`, wire types |
 | `driver.ts` | atoll | main | wraps `mountIsland`/`connectIslandWorker`: `WorkerLike` normalization, `doorbell: false` + `mode: 'poll'` defaults |
 | `worker.ts` | atoll | worker | re-exports `@atolljs/islands/worker` (definers, `emit`, `runInInstance`, proxy DOM) + `enterInstance`/`exitInstance` helpers |
-| `shell.tsx` | atoll-island | main | `<Island/>`, `islandComponent`, `lazyIsland`, contract facades, shell/island prop splitting |
-| `adapter.tsx` | atoll-island | worker | `viewIslandApp`, `viewIsland`, `defineViewPolyWorker`, `defineViewMonoWorker`, render scoping, event-name bridge |
-| `index.ts`/`worker.ts` | atoll-island | both | entry points: index re-exports shell + driver API; worker re-exports adapter + `@preact-mvc/atoll/worker` |
+| `shell.ts` | atoll-island | main | `<Island/>`, `islandComponent`, `lazyIsland`, contract facades, shell/island prop splitting |
+| `renderer.ts` | atoll-island | worker | the `solid-js/universal` `createRenderer` bound to the ambient/proxy document + the JSX runtime module worker files compile against |
+| `adapter.ts` | atoll-island | worker | `viewIslandApp`, `viewIsland`, `defineViewPolyWorker`, `defineViewMonoWorker`, per-key signal props, instance scoping |
+| `index.ts`/`worker.ts` | atoll-island | both | entry points: index re-exports shell + driver API; worker re-exports adapter + renderer + `@solid-mvc/atoll/worker` |
 
 ## The contract facade
 
@@ -68,7 +69,7 @@ worker factory — and both sides consume it.
 
 ```ts
 // ticker.contract.ts — imported by shell AND worker entry
-import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const tickerContract = defineIslandContract({
   app: 'ticker',
@@ -83,7 +84,7 @@ export const tickerContract = defineIslandContract({
 
 ```tsx
 // shell view — no worker plumbing at the call site
-import { islandComponent } from '@preact-mvc/atoll-island';
+import { islandComponent } from '@solid-mvc/atoll-island';
 import { tickerContract } from '../islands/ticker.contract';
 
 const TickerIsland = islandComponent(tickerContract);
@@ -94,7 +95,7 @@ const TickerIsland = islandComponent(tickerContract);
 
 ```ts
 // worker entry — the same contract attaches to the app
-import { defineViewPolyWorker, viewIslandApp } from '@preact-mvc/atoll-island/worker';
+import { defineViewPolyWorker, viewIslandApp } from '@solid-mvc/atoll-island/worker';
 import { tickerContract } from '../islands/ticker.contract';
 
 export const worker = defineViewPolyWorker({
@@ -134,39 +135,39 @@ Rules:
   early-out on those fields (zrender's `normalizeEvent`) get correct
   pointer-local coords, which is what makes echarts' axis pointer and
   tooltip work inside a worker.
-- **Proxy DOM** (Atoll worker side): enough surface for Preact's diff —
-  `createElement`, `insertBefore`, `removeChild`, `innerHTML`, `style`,
-  `addEventListener`, sibling/parent traversal.
-- **Event-name bridge** (`adapter.tsx`): Preact decides the DOM event
-  name via `'onclick' in el`; the proxy element has no `on*` props, so the
-  probe fails and Preact registers the prop-sliced name `'Click'` while
-  keying `dom._listeners` under it. The bridge wraps
-  `ProxyElement.prototype.addEventListener`: the `listen` op carries the
-  real DOM type and the wrapped handler re-tags the payload with the
-  prop-sliced name so `eventProxy`'s dict lookup resolves. PascalCase
-  slices are lowercased WHOLE ('MouseLeave' → 'mouseleave',
-  'DblClick' → 'dblclick'); only the first-char decap would produce
-  'mouseLeave', a type real DOM never dispatches. All-caps
-  ('DOMContentLoaded') and lowercase types pass through. (A prototype
-  `has`-trap alternative was tried and rejected: it breaks
-  `instanceof ProxyNode` on spliced-in proxies.)
-- **`sync` lane** (`adapter.tsx`): rendered handles may provide
-  `sync(fn)`; the dispatch task runs the event handler through it and the
-  adapter re-renders synchronously (Preact's `render()` is the flush), so
-  handler-driven commits land in the same task's op batch instead of a
-  poll cycle later. The re-render happens for EVERY dispatched event —
-  including listeners on proxy elements the app didn't create (e.g.
-  zrender's viewport mousemove). Any imperative side effect driven from
-  `render()` (chart `setOption`, emits, manual DOM writes) must be
-  guarded against unchanged inputs, or every pointer event rebuilds it:
-  the enterprise chart islands reference-check their series data before
-  calling `setOption` for exactly this reason.
-- **Render scoping** (`adapter.tsx`): mount/update run in
-  `runInInstance`, but signal-driven re-renders are deferred by Preact
-  past the scope. Each root vnode is stamped `__islandInstance`;
-  `options.__r` walks the `__` parent chain and `enterInstance`s the
-  stamped key, `options.diffed` restores via `exitInstance`. Deterministic,
-  strictly better than the ambient heuristic.
+- **Proxy DOM** (Atoll worker side): enough surface for the universal
+  renderer's host contract — `createElement`, `createTextNode`,
+  `insertBefore`, `removeChild`, `textContent`, `style`,
+  `addEventListener`, `setAttribute`, sibling/parent traversal.
+- **Universal renderer** (`renderer.ts`): `solid-js/universal`'s
+  `createRenderer` bound to the ambient document — inside a task it
+  resolves the instance's proxy doc through the dispatcher. The module
+  also IS the JSX runtime worker files compile against
+  (`generate: 'universal'`, `moduleName: '@solid-mvc/atoll-island/worker'`):
+  compiled output calls its `createElement`/`insert`/`setProp`/`spread`/
+  `effect`/`memo`/`createComponent` surface, and `createComponent` routes
+  View classes through `viewComponent()` exactly like the DOM runtime.
+  `setProperty` handles `on*` props by attaching real listeners with the
+  lowercase DOM type — universal output never hits the `'onclick' in el`
+  probe problem Preact had, so no event-name bridge is needed.
+- **`sync` lane** (`adapter.ts`): rendered handles may provide `sync(fn)`;
+  the dispatch task runs the event handler inside the instance scope.
+  Solid flushes signal effects synchronously, so handler-driven DOM writes
+  land in this task's op batch on their own — no re-render pass to force.
+  Effects that fire on EVERY dispatch (zrender viewport mousemove
+  included) still mean render-driven side effects (chart `setOption`,
+  emits) must be reference-guarded.
+- **Render scoping** (`renderer.ts`): mount/update run in
+  `runInInstance`, but signal writes from timers flush effects with no
+  task wrapper. `registerInstanceDoc(doc, instance)` tags each mount's
+  proxy document; `insert` wraps its accessor so out-of-task evaluation
+  `enterInstance`s the owning document's instance — the Solid analog of
+  the old vnode-stamp scope walk, scoped through the insertion boundary
+  instead. Deterministic, strictly better than the ambient heuristic.
+- **Per-key signal props** (`adapter.ts`): wire props arrive on a Proxy
+  whose every key is a `createSignal`; `updateProps` writes only changed
+  keys, so the DOM patch is exactly as fine-grained as the reads —
+  one text/attr op per changed dependent, never a rebuild.
 - **DI in islands**: `viewIslandApp` creates a fresh root `Injector` per
   mount inside `InjectorContext.Provider`; `@Component({ providers,
   imports, controllers })` metadata works unchanged — worker-side stores
@@ -176,8 +177,9 @@ Rules:
   its own module graph) but means in-process tests see every def's apps.
   Consequence: the mono name-fallback only kicks in for a single-app
   registry, so tests mount mono apps by their registry key.
-- **View props**: `Injector.instantiate(cls, props)` passes props to the
-  constructor so field initializers (`signal(this.props.start)`) see them.
+- **View props**: `Injector.instantiate(cls, props)` passes the signal
+  proxy to the constructor so field initializers
+  (`signal(this.props.start)`) see initial values.
 
 ## Shell usage
 
@@ -226,8 +228,8 @@ stream to the main driver. The pieces:
 - `PageWorkerHost` (service) owns one `IslandClient` PER PAGE, connected
   lazily: `clientFor(app)` maps the app name to that page's `new
   Worker(new URL(...))` literal (the factory record keeps every entry
-  bundler-detectable). Route components in `routes.ts` are thin
-  `() => h(WorkerPage, { app })` hosts, and `WorkerPage` mounts
+  bundler-detectable). Route components in `routes.tsx` are thin
+  `() => <WorkerPage app={app} />` hosts, and `WorkerPage` mounts
   `<Island client={host.clientFor(app)} app={app}>`. Every client
   connects with `keepAlive: true`: navigating away unmounts the page
   instance — lifecycle stops, timers clear, nested sub-workers still die
@@ -254,7 +256,13 @@ stream to the main driver. The pieces:
   boundary as `data` (a `number[]`), `dark` re-initializes the theme on
   toggle. Its mount element is the chart box itself — the real
   element's measured box forwards down as the sub-island's pushed
-  container size, so echarts' init gets honest geometry. echarts uses
+  container size. Geometry reads are asynchronous over the wire:
+  `clientWidth`/`getComputedStyle` return 0/empty until the driver's
+  first `setRects` push (and warn once per feature). `bind()` therefore
+  defers `echarts.init` to the first non-empty `doc.observeSize` rect
+  and unsubscribes; later resizes ride `doc.onResize` → `chart.resize()`.
+  Any layout-measuring library in a worker should init the same way —
+  `observeSize(el, cb)` is the synchronous-read-free channel. echarts uses
   its SVG renderer with modular imports (`echarts/core` + LineChart +
   Grid + Tooltip + AxisPointer + SVGRenderer): every shape is a
   `createElementNS`/`attr`/`style` op, and zrender's
@@ -319,22 +327,85 @@ in-process caveats:
   already-spawned workers (test doubles) to entries; the factory form
   `() => new Worker(new URL('./x.worker.ts', import.meta.url))` stays
   mandatory for real bundler-detectable entries.
-- **Single renderer**: only the view adapter; no react/vue/solid/angular
+- **Single renderer**: only the Solid view adapter; no react/vue/angular
   island packages.
-- **The event-name bridge is ours**: Atoll's adapters get lowercase event
-  names natively (React keys by convention); Preact's `'on*' in el` probe
-  needs the proxy-boundary normalization.
+- **No event-name bridge needed**: the universal renderer's `setProperty`
+  receives `on*` props already split, so listeners attach with real DOM
+  types — Preact's `'on*' in el` probe problem doesn't exist here.
 
 ## Invariants
 
 - One island instance = one isolated op stream; `app@N` keys everything.
 - Everything crossing the wire is structured-cloneable (props, payloads,
   ops); functions only as marshalled `callbackProp` tokens.
-- DOM work outside a task must re-enter via `runInInstance` (or the vnode
-  stamp path) — ambient `document` out-of-scope is a documented heuristic,
-  not a contract.
+- DOM work outside a task must re-enter via `runInInstance` (or the
+  `registerInstanceDoc`/`insert` scoping path) — ambient `document`
+  out-of-scope is a documented heuristic, not a contract.
 - `preventDefault`/`stopPropagation` on dispatched events are synthesized
   no-ops: the real event already ran on the main thread.
 - Real-worker entries must stay bundler-detectable: inline
   `new Worker(new URL('…', import.meta.url), { type: 'module' })`.
 - `data-atoll-slot` attrs route to `slots` callbacks for transclusion.
+- `keepAlive` keeps a CLIENT'S worker resident after its last island
+  unmounts — it does not dedupe mounts. A `<Ticker client={...}>` facade
+  that connects per mount leaks a worker each time: the old thread stays
+  resident AND the new client spawns another. Pair keepAlive with a
+  client that outlives the mount — a service-held client for page
+  workers, a module-scope `Map` in the worker realm for sub-islands
+  (see `examples/enterprise/src/lib/sub-workers.ts`: the module only
+  exists in the worker bundle, so its clients survive app-instance
+  unmount as long as the page worker itself is resident).
+- `pool sent INIT without memory, but shared-memory contracts are defined`
+  is benign in `poll` mode: `@atolljs/islands` declares the doorbell
+  contract (`renderMemory`) at module scope unconditionally, and the
+  warning can't tell it apart from user contracts that would actually
+  throw. `bumpOpsVersion` guards on `doorbell.bound`, so the doorbell is
+  simply inert. The fix is `mode: 'push'` + COOP/COEP headers — not
+  patchable from our code, and `definePolyWorker({ sharedMemory })` only
+  swaps the contract instance, it can't skip declaring it.
+- **Worker bundles get their own plugin list.** Vite 6 does NOT inherit
+  `config.plugins` for `new Worker(...)` bundles — `worker.plugins` must
+  return the solid plugin explicitly or every .tsx inside the worker
+  falls back to esbuild's classic JSX (`React.createElement`, mount
+  crashes). Everything reachable from a worker entry compiles
+  `generate: 'universal'` — the whole bundle is proxy-DOM code, so no
+  file-glob split inside `worker.plugins`. `worker.format: 'es'` is also
+  required: the `iife` default empties `import.meta`, which breaks the
+  nested `new Worker(new URL(...))` sub-island entries inside page
+  workers.
+- **Dev mode needs importer-graph tagging, not filename globs.** In dev,
+  modules transform individually and worker entries arrive as
+  `?worker_file` URLs; nothing about `dashboard.view.tsx` or
+  `ui/*.tsx` says "compile me universal". `workerUniversalTag()`
+  (`@solid-mvc/atoll-island/vite`) stamps `?smvc-worker` onto every
+  module reachable from a `.worker.`/`.island.` entry (the marker rides
+  through `.ts` intermediates too), and `WORKER_FILES` includes the tag
+  regex so the universal plugin's `include` and the DOM plugin's
+  `exclude` both catch it. The tagged id is a second module instance —
+  the same file keeps its clean DOM compile for the shell graph.
+- **SVG needs a tag-name rule in universal render.** The universal
+  transform emits `createElement("svg")` with no namespace argument —
+  there is no parent context at element creation. The renderer maps
+  SVG-only tags (svg, circle, path, g, …) to `doc.createElementNS` so
+  the `create` op carries `ns` and the driver replays real SVG; an
+  html-namespaced `<svg>` silently renders as 0×0. Tags that exist in
+  BOTH HTML and SVG (a, font, image, script, style, title) stay HTML —
+  an svg-namespaced `<a>` in a view would break real HTML. `Dynamic`
+  (`lucide-solid` icon bodies) resolves ns itself via `SVGElements`.
+- **Never tag prebundled deps.** `?smvc-worker` on a `/node_modules/
+  .vite/deps/*` id or a compiled `.js`/`.mjs` under `node_modules` gives
+  the worker realm TWO instances of that dep (tagged + untagged) — and
+  when the dep is the Solid reactive core, effects silently die and
+  islands render their mount batch then freeze. The tagger skips those
+  ids; raw `.ts`/`.tsx`/`.jsx` sources under `node_modules` (e.g.
+  `lucide-solid`) still get tagged because they need the universal
+  compile.
+- **The worker tag doubles the dev module graph.** Every tagged module
+  is a second fetched/compiled copy of the file, so barrel imports cost
+  twice in dev: `import { Check } from 'lucide-solid'` fetched all
+  ~1,750 per-icon modules on the main thread AND again tagged for the
+  worker realm (~3,500 requests on the dashboard). Deep-import icons
+  (`lucide-solid/icons/check`, default export) — same `solid` condition
+  resolution, ~one request per icon per realm. Do NOT `optimizeDeps`
+  lucide-solid to work around it: the prebundled `.mjs` calls
+  `solid-js/web` DOM helpers, which is the wrong realm in a worker.

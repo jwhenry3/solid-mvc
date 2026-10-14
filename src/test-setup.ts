@@ -29,6 +29,14 @@ Object.defineProperty(globalThis, 'localStorage', {
   configurable: true,
 });
 
+// jsdom stubs scrollTo as a not-implemented error — @solidjs/router calls
+// it on every navigation, so stub it silently.
+Object.defineProperty(globalThis, 'scrollTo', {
+  value: () => {},
+  configurable: true,
+  writable: true,
+});
+
 // jsdom has no matchMedia — the dark-mode ThemeService only needs the
 // matches flag + listener plumbing, so a fixed "light" stub suffices.
 if (typeof globalThis.matchMedia !== 'function') {

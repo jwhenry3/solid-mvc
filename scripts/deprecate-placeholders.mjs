@@ -18,7 +18,7 @@ const otp = otpArg ? otpArg.split('=')[1] : null;
 
 for (const name of PACKAGES) {
   const cmd =
-    `npm deprecate "@preact-mvc/${name}@${SPEC}" "${MESSAGE}"` +
+    `npm deprecate "@solid-mvc/${name}@${SPEC}" "${MESSAGE}"` +
     (otp ? ` --otp=${otp}` : '');
   console.log(`\n→ ${cmd}`);
   const r = spawnSync(cmd, { stdio: 'inherit', shell: true });

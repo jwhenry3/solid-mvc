@@ -1,4 +1,5 @@
-import { Component, View, inject } from '@preact-mvc/core';
+import { For } from 'solid-js';
+import { Component, View, inject } from '@solid-mvc/core';
 import { TodoController } from './todo.controller';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
 import { Input } from '@/ui/input';
@@ -42,8 +43,9 @@ export class TodoView extends View {
               <Button type="submit">Add</Button>
             </form>
             <ul class="divide-y">
-              {c.todos.value.map((t) => (
-                <li key={t.id} class="flex items-center gap-3 py-2.5">
+              <For each={c.todos.value}>
+                {(t) => (
+                <li class="flex items-center gap-3 py-2.5">
                   <input
                     type="checkbox"
                     class="h-4 w-4 cursor-pointer"
@@ -62,7 +64,8 @@ export class TodoView extends View {
                     ✕
                   </Button>
                 </li>
-              ))}
+                )}
+              </For>
             </ul>
           </CardContent>
         </Card>

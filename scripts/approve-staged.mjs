@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Approve staged @preact-mvc/* versions — the counterpart to
+// Approve staged @solid-mvc/* versions — the counterpart to
 // publish.mjs's `npm stage publish` step. Staged packages are NOT
 // installable until approved; this walks the stage queue and approves
 // each pending package in dependency order (core first, so dependents
@@ -35,14 +35,14 @@ const dryRun = args.includes('--dry-run');
 const otpArg = args.find((a) => a.startsWith('--otp='));
 const otp = otpArg ? otpArg.split('=')[1] : null;
 
-const SCOPE = '@preact-mvc/';
+const SCOPE = '@solid-mvc/';
 // Dependency order — approve requirements before dependents so the
 // registry never briefly serves a version whose deps don't exist yet.
 const ORDER = [
-  '@preact-mvc/core',
-  '@preact-mvc/atoll',
-  '@preact-mvc/atoll-island',
-  '@preact-mvc/cli',
+  '@solid-mvc/core',
+  '@solid-mvc/atoll',
+  '@solid-mvc/atoll-island',
+  '@solid-mvc/cli',
 ];
 
 const list = npm(['stage', 'list', '--json']);
@@ -63,7 +63,7 @@ const ours = staged
 const others = staged.filter((s) => !s.packageName?.startsWith(SCOPE));
 
 if (ours.length === 0) {
-  console.log('No staged @preact-mvc/* versions pending approval.');
+  console.log('No staged @solid-mvc/* versions pending approval.');
 } else {
   for (const s of ours) {
     console.log(`\n→ npm stage approve ${s.id}  ${s.packageName}@${s.version}`);

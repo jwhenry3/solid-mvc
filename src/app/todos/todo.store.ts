@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed, effect } from '@preact-mvc/core';
+import { Injectable, inject, signal, computed, effect } from '@solid-mvc/core';
 import { API_URL } from '../core/tokens';
 
 export interface Todo {

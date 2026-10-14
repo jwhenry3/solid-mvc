@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { ComponentChildren, JSX } from 'preact';
+import type { JSX } from 'solid-js';
 import { cn } from '@/lib/cn';
 
 const buttonVariants = cva(
@@ -26,8 +26,8 @@ const buttonVariants = cva(
 );
 
 export type ButtonProps = JSX.IntrinsicElements['button'] &
-  VariantProps<typeof buttonVariants> & { children?: ComponentChildren };
+  VariantProps<typeof buttonVariants> & { children?: JSX.Element };
 
-export function Button({ class: className, variant, size, ...props }: ButtonProps): ComponentChildren {
+export function Button({ class: className, variant, size, ...props }: ButtonProps): JSX.Element {
   return <button class={cn(buttonVariants({ variant, size }), className as string)} {...props} />;
 }

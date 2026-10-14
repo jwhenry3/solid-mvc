@@ -1,4 +1,4 @@
-import { Module } from '@preact-mvc/core';
+import { Module } from '@solid-mvc/core';
 import { CounterView } from './counter.view';
 
 @Module({

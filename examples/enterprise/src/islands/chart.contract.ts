@@ -12,7 +12,7 @@
  * installs instance globals. The URL literal inside `new Worker(...)`
  * stays bundler-detectable — do not hoist or compute it.
  */
-import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const chartContract = defineIslandContract({
   app: 'chart',

@@ -6,7 +6,7 @@
  *   @Module({ imports: [QueryModule.forRoot()] })
  *   // then anywhere: private q = inject(QueryClient)
  */
-import { QueryClient, type QueryClientConfig } from '@tanstack/preact-query';
+import { QueryClient, type QueryClientConfig } from '@tanstack/query-core';
 import { syncQueryClient } from './broadcast-query';
 
 export class QueryModule {

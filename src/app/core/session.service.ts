@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@preact-mvc/core';
+import { Injectable, signal } from '@solid-mvc/core';
 
 // providedIn: 'root' — resolved from the root injector no matter which module
 // or view asks for it, so every feature sees the same instance.

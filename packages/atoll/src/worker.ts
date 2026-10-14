@@ -1,8 +1,8 @@
 /**
- * `@preact-mvc/atoll/worker` — the worker-side entry, re-exported from
+ * `@solid-mvc/atoll/worker` — the worker-side entry, re-exported from
  * `@atolljs/islands/worker`. Import in worker entries only:
  *
- *   import { definePolyWorker } from '@preact-mvc/atoll/worker';
+ *   import { definePolyWorker } from '@solid-mvc/atoll/worker';
  *   export const worker = definePolyWorker({ apps: { ... } });
  */
 export {
@@ -65,7 +65,7 @@ export type IslandWorkerDef = IslandWorkerDefinition;
 /**
  * Enter `key`'s instance scope, returning the previous key for restore —
  * a named pair around `setActiveInstance` (which returns the prev itself),
- * used by the PreactMVC adapter's out-of-task render scoping.
+ * used by the SolidMVC adapter's out-of-task render scoping.
  */
 export const enterInstance = (key: string): string => setActiveInstance(key);
 /** Restore the scope `enterInstance` returned (`''` when there was none). */

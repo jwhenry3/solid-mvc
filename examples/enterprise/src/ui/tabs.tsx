@@ -1,12 +1,11 @@
 /**
  * shadcn-style Tabs without Radix: a tiny signal-driven version, framework
  * native. Tabs owns a `signal` for the active value; triggers/contents read
- * it in render so everything stays reactive.
+ * it inside JSX accessors so updates stay tracked.
  */
-import { signal, type Signal } from '@preact/signals';
-import type { ComponentChildren, JSX } from 'preact';
-import { createContext } from 'preact';
-import { useContext } from 'preact/hooks';
+import { signal, type Signal } from '@solid-mvc/core';
+import { createContext, useContext, Show } from 'solid-js';
+import type { JSX } from 'solid-js';
 import { cn } from '@/lib/cn';
 
 const TabsCtx = createContext<Signal<string>>(signal(''));
@@ -16,10 +15,10 @@ export function Tabs({
   defaultValue = '',
   class: c,
   ...p
-}: JSX.IntrinsicElements['div'] & { children?: ComponentChildren } & {
+}: JSX.IntrinsicElements['div'] & {
   value?: Signal<string>;
   defaultValue?: string;
-}): ComponentChildren {
+}): JSX.Element {
   const state = value ?? signal(defaultValue);
   return (
     <TabsCtx.Provider value={state}>
@@ -28,7 +27,7 @@ export function Tabs({
   );
 }
 
-export function TabsList({ class: c, ...p }: JSX.IntrinsicElements['div'] & { children?: ComponentChildren }): ComponentChildren {
+export function TabsList({ class: c, ...p }: JSX.IntrinsicElements['div']): JSX.Element {
   return (
     <div
       class={cn(
@@ -44,14 +43,13 @@ export function TabsTrigger({
   value,
   class: c,
   ...p
-}: JSX.IntrinsicElements['button'] & { children?: ComponentChildren } & { value: string }): ComponentChildren {
+}: JSX.IntrinsicElements['button'] & { value: string }): JSX.Element {
   const state = useContext(TabsCtx);
-  const active = state.value === value;
   return (
     <button
       class={cn(
         'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
-        active && 'bg-background text-foreground shadow',
+        state.value === value && 'bg-background text-foreground shadow',
         c,
       )}
       onClick={() => (state.value = value)}
@@ -64,8 +62,11 @@ export function TabsContent({
   value,
   class: c,
   ...p
-}: JSX.IntrinsicElements['div'] & { children?: ComponentChildren } & { value: string }): ComponentChildren {
+}: JSX.IntrinsicElements['div'] & { value: string }): JSX.Element {
   const state = useContext(TabsCtx);
-  if (state.value !== value) return null;
-  return <div class={cn('mt-2 focus-visible:outline-none', c)} {...p} />;
+  return (
+    <Show when={state.value === value}>
+      <div class={cn('mt-2 focus-visible:outline-none', c)} {...p} />
+    </Show>
+  );
 }

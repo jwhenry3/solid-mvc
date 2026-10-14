@@ -1,5 +1,6 @@
-import { computed, signal } from '@preact/signals';
-import { route as prRoute } from 'preact-router';
+import { createEffect } from 'solid-js';
+import type { Location, Navigator, RouteMatch as WireRouteMatch } from '@solidjs/router';
+import { computed, signal } from '../signals';
 import { Injectable } from '../decorators';
 import { InjectionToken } from '../injector';
 
@@ -79,16 +80,41 @@ function matchRoutes(routes: Route[], url: string): RouteMatch[] | null {
   return matchSegments(routes, path.split('/').filter(Boolean));
 }
 
+/** Key under which each framework `Route` rides on its RouteDefinition's
+ *  `info`, so wire matches can map back to the configured route. */
+export const ROUTE_INFO_KEY = 'smvcRoute';
+
+function decodeParams(params: Record<string, string | undefined>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined) continue;
+    try {
+      out[k] = decodeURIComponent(v);
+    } catch {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
 @Injectable()
 export class Router {
   /** Mount prefix, normalized to '' or '/demo' (no trailing slash). */
   readonly base: string;
   url = signal(typeof location === 'undefined' ? '/' : '');
   /**
+   * The match chain reported by the mounted @solidjs/router tree — null
+   * until a root <RouterOutlet/> mounts it (standalone Routers, views
+   * outside any outlet, worker realms). In that case `matches` falls back
+   * to the service-side matcher, which shares the same semantics.
+   */
+  private wireMatches = signal<RouteMatch[] | null>(null);
+  private navigator: Navigator | null = null;
+  /**
    * The matched chain outermost → innermost — depth d is what the d-th
    * nested <RouterOutlet/> renders.
    */
-  matches = computed(() => matchRoutes(this.routes, this.url.value));
+  matches = computed(() => this.wireMatches.value ?? matchRoutes(this.routes, this.url.value!));
   /** Back-compat: the chain's outermost match. */
   match = computed(() => this.matches.value?.[0] ?? null);
   /** Params merged across the whole chain (inner levels win on collision). */
@@ -105,20 +131,28 @@ export class Router {
     if (typeof location !== 'undefined') {
       this.url.value = this.strip(location.pathname) + location.search;
     }
+    // Plain popstate tracking — the mounted @solidjs/router also observes
+    // it and feeds this signal through the bridge; this keeps standalone
+    // Routers (no outlet mounted) in sync too.
     if (typeof window !== 'undefined') {
       window.addEventListener('popstate', this.onPopState);
     }
   }
 
+  /** The configured route table — the root outlet maps it to defs. */
+  get routeTable(): Route[] {
+    return this.routes;
+  }
+
   /**
    * Static-host deep links: the site's 404 shim redirects
-   * `/docs/<app>/<rest>` to `<app>/?__pmvc_path=<rest>` so the app loads;
+   * `/docs/<app>/<rest>` to `<app>/?__smvc_path=<rest>` so the app loads;
    * restore the real URL via replaceState before seeding `url` — the
    * browser history never sees the hop. No-op everywhere else.
    */
   private consumeShimParam(): void {
     if (typeof location === 'undefined' || typeof history === 'undefined') return;
-    const rest = new URL(location.href).searchParams.get('__pmvc_path');
+    const rest = new URL(location.href).searchParams.get('__smvc_path');
     if (rest === null) return;
     history.replaceState(null, '', this.base + '/' + rest);
   }
@@ -135,8 +169,8 @@ export class Router {
     return this.base + to;
   }
 
-  /** Called by the preact-router bridge on any URL change it sees —
-   *  foreign route() calls, its global <a> interceptor, popstate. */
+  /** Feed a URL change into the router — popstate, the bridge, or anything
+   *  else observing location. */
   syncUrl(fullUrl: string): void {
     const [path, search = ''] = fullUrl.split('?');
     const stripped = this.strip(path);
@@ -148,18 +182,56 @@ export class Router {
     this.syncUrl(location.pathname + location.search);
   };
 
-  navigate(to: string): void {
-    // Through preact-router: updates every mounted <Router> in the tree —
-    // ours and foreign ones — not just our own subscriber. route() is a
-    // no-op when no mounted PR Router claims the url, so fall back to a
-    // manual push when the bridge isn't up yet.
-    if (!prRoute(this.base + to)) {
-      history.pushState(null, '', this.base + to);
-      this.url.value = to;
+  /** Bound to injector deactivate — drops the global listener. */
+  onDestroy = () => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('popstate', this.onPopState);
     }
+  };
+
+  navigate(to: string): void {
+    const nav = this.navigator;
+    if (nav) {
+      // @solidjs/router settles navigation on its transition lane — url,
+      // history, and matches update asynchronously via the bridge.
+      nav(to);
+      return;
+    }
+    // No Router tree mounted — standalone service semantics (sync).
+    if (typeof history !== 'undefined') history.pushState(null, '', this.base + to);
+    this.url.value = to;
   }
 
   isActive(path: string): boolean {
     return this.url.value === path;
+  }
+
+  /**
+   * Called once by the root outlet's bridge component — the live
+   * @solidjs/router context becomes the source for `url`/`matches`, and
+   * `navigate` delegates to its navigator (scroll, transitions, anchors).
+   */
+  attachRouter(
+    navigator: Navigator,
+    loc: Location,
+    currentMatches: () => WireRouteMatch[],
+  ): void {
+    this.navigator = navigator;
+    createEffect(() => {
+      this.syncUrl(loc.pathname + loc.search);
+      const wire = currentMatches();
+      this.wireMatches.value = wire.map((m) => ({
+        route: (m.route.info?.[ROUTE_INFO_KEY] as Route | undefined) ?? {
+          path: m.route.originalPath,
+        },
+        params: decodeParams(m.params),
+      }));
+    });
+  }
+
+  /** Clear the wiring when the Router tree disposes. */
+  detachRouter(): void {
+    this.navigator = null;
+    this.wireMatches.value = null;
   }
 }

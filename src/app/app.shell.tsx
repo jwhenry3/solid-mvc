@@ -1,5 +1,11 @@
-import { Component, View, inject, RouterOutlet, Link, Router } from '@preact-mvc/core';
-import { ListTodo, Plus, Sparkles, Boxes, Settings, Sun, Moon } from 'lucide-preact';
+import { Component, View, inject, RouterOutlet, Link, Router } from '@solid-mvc/core';
+import ListTodo from 'lucide-solid/icons/list-todo';
+import Plus from 'lucide-solid/icons/plus';
+import Sparkles from 'lucide-solid/icons/sparkles';
+import Boxes from 'lucide-solid/icons/boxes';
+import Settings from 'lucide-solid/icons/settings';
+import Sun from 'lucide-solid/icons/sun';
+import Moon from 'lucide-solid/icons/moon';
 import { SessionService } from './core/session.service';
 import { APP_TITLE } from './core/tokens';
 import { ThemeService } from './shared/theme.service';
@@ -22,9 +28,6 @@ export class AppShell extends View {
   private title = inject(APP_TITLE);
 
   render() {
-    const url = this.router.url.value;
-    const dark = this.theme.resolved.value === 'dark';
-    const page = NAV.find((n) => url.startsWith(n.match))?.label ?? 'Todos';
     const user = this.session.user.value.name;
     return (
       <div class="flex min-h-screen bg-background">
@@ -33,14 +36,14 @@ export class AppShell extends View {
           <div class="h-14 flex items-center px-4 border-b">
             <img src="/favicon.svg" alt="" class="h-7 w-7 mr-2" />
             <div class="min-w-0">
-              <div class="font-semibold">PreactMVC</div>
+              <div class="font-semibold">SolidMVC</div>
               <div class="text-xs text-muted-foreground truncate">{this.title}</div>
             </div>
           </div>
           <nav class="flex-1 p-2 space-y-1">
             {NAV.map((n) => {
               const Icon = n.icon;
-              const active = url.startsWith(n.match);
+              const active = this.router.url.value!.startsWith(n.match);
               return (
                 <Link
                   to={n.to}
@@ -75,7 +78,9 @@ export class AppShell extends View {
           <header class="h-14 border-b bg-card flex items-center justify-between px-6">
             <div class="text-sm text-muted-foreground">
               Workspace <span class="mx-1">/</span>{' '}
-              <span class="text-foreground font-medium">{page}</span>
+              <span class="text-foreground font-medium">
+                {NAV.find((n) => this.router.url.value!.startsWith(n.match))?.label ?? 'Todos'}
+              </span>
             </div>
             <div class="flex items-center gap-2">
               <button
@@ -83,7 +88,7 @@ export class AppShell extends View {
                 onClick={() => this.theme.toggle()}
                 title="Toggle theme"
               >
-                {dark ? <Sun size={16} /> : <Moon size={16} />}
+                {this.theme.resolved.value === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
               </button>
               <Avatar name={user} class="h-8 w-8" />
             </div>

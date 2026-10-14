@@ -1,11 +1,11 @@
 // Lockstep staged publish — `node scripts/publish.mjs <version|v*.*.*> [pkg] [--direct] [--dry-run]`.
 //
-// An optional package positional (`@preact-mvc/atoll`, `atoll`, or
+// An optional package positional (`@solid-mvc/atoll`, `atoll`, or
 // `packages/atoll`) narrows the run to that one package — its manifest
 // alone is stamped; internal deps still stamp to the release version.
 //
 // Stamps every publishable packages/*/package.json with the release
-// version, rewrites internal @preact-mvc/* dep ranges to match, then
+// version, rewrites internal @solid-mvc/* dep ranges to match, then
 // `npm stage publish`es in dependency order: core → atoll → atoll-island.
 // Staged versions sit in npm's stage queue (not installable) until a
 // maintainer approves with 2FA — `npm stage list/view/approve` or the
@@ -217,10 +217,10 @@ for (const sig of ['SIGINT', 'SIGTERM']) {
 
 // Dependency order — a package publishes after every internal dep it needs.
 const order = [
-  '@preact-mvc/core',
-  '@preact-mvc/atoll',
-  '@preact-mvc/atoll-island',
-  '@preact-mvc/cli',
+  '@solid-mvc/core',
+  '@solid-mvc/atoll',
+  '@solid-mvc/atoll-island',
+  '@solid-mvc/cli',
 ];
 const sorted = [...selected].sort(
   (a, b) =>

@@ -1,12 +1,13 @@
 {
-  "name": "@preact-mvc/atoll-island",
+  "name": "@solid-mvc/atoll-island",
   "version": "0.0.0",
-  "description": "preact-mvc island adapter: <Island/> shell components + Preact renderer for @preact-mvc/atoll worker islands",
+  "description": "solid-mvc island adapter: <Island/> shell components + Solid universal renderer for @solid-mvc/atoll worker islands",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
     "./worker": "./src/worker.ts",
+    "./vite": "./src/vite.ts",
     "./package.json": "./package.json",
     "./*": "./src/*"
   },
@@ -20,13 +21,14 @@
     "build": "tsc -p tsconfig.build.json"
   },
   "dependencies": {
-    "@preact-mvc/atoll": "*",
-    "@preact-mvc/core": "*",
-    "preact": "^10.24.0"
+    "@solid-mvc/atoll": "*",
+    "@solid-mvc/core": "*",
+    "solid-js": "^1.9.15"
   },
   "devDependencies": {
-    "@atolljs/core": "0.1.11",
-    "@atolljs/islands": "0.1.11"
+    "@atolljs/core": "^0.1.12",
+    "@atolljs/islands": "^0.1.12",
+    "vite": "^6.0.0"
   },
   "publishConfig": {
     "access": "public",
@@ -34,7 +36,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jwhenry3/preact-mvc",
+    "url": "https://github.com/jwhenry3/solid-mvc",
     "directory": "packages/atoll-island"
   },
   "license": "MIT"

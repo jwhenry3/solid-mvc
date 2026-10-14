@@ -1,5 +1,5 @@
 {
-  "name": "@preact-mvc/atoll",
+  "name": "@solid-mvc/atoll",
   "version": "0.0.0",
   "description": "Framework-free worker-rendered islands: op protocol, proxy DOM, worker runtime, main-thread driver",
   "type": "module",
@@ -24,12 +24,12 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
-    "@atolljs/core": "0.1.11",
-    "@atolljs/islands": "0.1.11"
+    "@atolljs/core": "^0.1.12",
+    "@atolljs/islands": "^0.1.12"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jwhenry3/preact-mvc",
+    "url": "https://github.com/jwhenry3/solid-mvc",
     "directory": "packages/atoll"
   },
   "license": "MIT"

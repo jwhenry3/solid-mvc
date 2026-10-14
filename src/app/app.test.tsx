@@ -1,27 +1,25 @@
-import { render as preactRender, h } from 'preact';
-import { screen, fireEvent } from '@testing-library/preact';
-import { act } from 'preact/test-utils';
+import { screen, fireEvent } from '@solidjs/testing-library';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { bootstrap } from '@preact-mvc/core';
+import { bootstrap } from '@solid-mvc/core';
 import { AppModule } from './app.module';
 
 // Full-stack smoke: boots the real AppModule (router, modules, DI, views)
-// into a DOM node the way main.tsx does.
+// into a DOM node the way main.tsx does. Solid flushes updates
+// synchronously — no act() needed; bootstrap() returns the root disposer.
 
 let host: HTMLElement;
+let dispose: () => void;
 
 function boot(path = '/') {
   history.pushState(null, '', path);
   host = document.createElement('div');
   document.body.appendChild(host);
-  bootstrap(AppModule, host);
+  dispose = bootstrap(AppModule, host);
 }
 
 afterEach(() => {
-  if (host) {
-    preactRender(null, host);
-    host.remove();
-  }
+  dispose?.();
+  host?.remove();
 });
 
 beforeEach(() => {
@@ -30,45 +28,41 @@ beforeEach(() => {
 });
 
 describe('AppModule integration', () => {
+  // The root <RouterOutlet/> mounts the @solidjs/router tree via dynamic
+  // import (keeps it out of worker bundles), so routed content lands a
+  // tick after boot — await a routed element before interacting.
+  const todosMounted = () => screen.findByRole('heading', { name: 'Todos' });
+
   it('boots the shell with nav and the default todos route', async () => {
     boot('/');
     expect(await screen.findByText('MVC + Modules + JSX')).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'Todos' })).toBeTruthy();
+    expect(await todosMounted()).toBeTruthy();
     expect(screen.getByText(/remaining/)).toBeTruthy();
   });
 
   it('navigates between routes and tracks visits via the shared service', async () => {
     boot('/');
-    await act(async () => {
-      fireEvent.click(screen.getByRole('link', { name: 'Counter' }));
-    });
+    await todosMounted();
+    fireEvent.click(screen.getByRole('link', { name: 'Counter' }));
     expect(await screen.findByRole('heading', { name: 'Counter' })).toBeTruthy();
     expect(await screen.findByText(/Page visits this session: 2/)).toBeTruthy();
   });
 
   it('adds a todo through controller -> store -> view re-render', async () => {
     boot('/');
-    const input = screen.getByPlaceholderText('What needs doing?');
-    await act(async () => {
-      fireEvent.input(input, { target: { value: 'integration todo' } });
-      fireEvent.submit(input.closest('form')!);
-    });
+    const input = await screen.findByPlaceholderText('What needs doing?');
+    fireEvent.input(input, { target: { value: 'integration todo' } });
+    fireEvent.submit(input.closest('form')!);
     expect(await screen.findByText('integration todo')).toBeTruthy();
   });
 
   it('keeps module-scoped store state across navigation', async () => {
     boot('/');
-    const input = screen.getByPlaceholderText('What needs doing?');
-    await act(async () => {
-      fireEvent.input(input, { target: { value: 'survives nav' } });
-      fireEvent.submit(input.closest('form')!);
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole('link', { name: 'Counter' }));
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole('link', { name: 'Todos' }));
-    });
+    const input = await screen.findByPlaceholderText('What needs doing?');
+    fireEvent.input(input, { target: { value: 'survives nav' } });
+    fireEvent.submit(input.closest('form')!);
+    fireEvent.click(screen.getByRole('link', { name: 'Counter' }));
+    fireEvent.click(await screen.findByRole('link', { name: 'Todos' }));
     expect(await screen.findByText('survives nav')).toBeTruthy();
   });
 

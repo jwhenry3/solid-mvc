@@ -1,4 +1,4 @@
-import { Component, View, signal } from '@preact-mvc/core';
+import { Component, View, signal } from '@solid-mvc/core';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/ui/button';
 import { Badge } from '@/ui/badge';
@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/ui/dialog';
-import { Check } from 'lucide-preact';
+import Check from 'lucide-solid/icons/check';
 
 /** The ui/ kitchen sink — every primitive in one place. */
 @Component()

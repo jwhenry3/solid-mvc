@@ -26,7 +26,7 @@ const BASE = (process.env.DOCS_BASE_URL ?? 'http://localhost:4190/docs/').replac
 
 // Release snapshots (docs/v<x.y.z>/ mounts) set VITE_DOCS_VERSION to the
 // version dir name — e.g. 'v0.1.0' — stamping it into <meta
-// preact-mvc:version> so docs.js can resolve paths across the extra
+// solid-mvc:version> so docs.js can resolve paths across the extra
 // segment, plus a noindex so the immutable copy never outranks the live
 // docs. Latest builds emit 'latest'.
 const DOCS_VERSION = process.env.VITE_DOCS_VERSION || 'latest';
@@ -52,19 +52,19 @@ const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, 
 function headBlock(route) {
   const url = route.id === 'overview' ? BASE : `${BASE}${route.id}/`;
   return [
-    `<meta name="preact-mvc:route" content="${route.id}" />`,
-    `<meta name="preact-mvc:version" content="${esc(DOCS_VERSION)}" />`,
+    `<meta name="solid-mvc:route" content="${route.id}" />`,
+    `<meta name="solid-mvc:version" content="${esc(DOCS_VERSION)}" />`,
     ...(DOCS_VERSION === 'latest' ? [] : ['<meta name="robots" content="noindex" />']),
     `<link rel="canonical" href="${esc(url)}" />`,
     '<meta property="og:type" content="article" />',
-    '<meta property="og:site_name" content="PreactMVC" />',
+    '<meta property="og:site_name" content="SolidMVC" />',
     `<meta property="og:title" content="${esc(route.title)}" />`,
     `<meta property="og:description" content="${esc(route.description)}" />`,
     `<meta property="og:url" content="${esc(url)}" />`,
     `<meta property="og:image" content="${esc(BASE)}social.png" />`,
     '<meta property="og:image:width" content="1200" />',
     '<meta property="og:image:height" content="630" />',
-    '<meta property="og:image:alt" content="PreactMVC — shield logo and wordmark" />',
+    '<meta property="og:image:alt" content="SolidMVC — shield logo and wordmark" />',
     '<meta name="twitter:card" content="summary_large_image" />',
     `<meta name="twitter:title" content="${esc(route.title)}" />`,
     `<meta name="twitter:description" content="${esc(route.description)}" />`,
@@ -82,7 +82,7 @@ function buildPage(route) {
       `<meta name="description" content="${esc(route.description)}" />`
     )
     .replace('<!--ssg:head-->', headBlock(route))
-    // Preact never runs in the built site — drop the SPA entry + preloads.
+    // Solid never runs in the built site — drop the SPA entry + preloads.
     .replace(/<script type="module"[^>]*><\/script>\s*/g, '')
     .replace(/<link rel="modulepreload"[^>]*>\s*/g, '')
     // vite emits ./assets/… against base './' — correct at root, broken one
@@ -100,10 +100,10 @@ function buildPage(route) {
 // legacy #/ redirects, and revealing the active nav link. Plain DOM, no
 // framework.
 const DOCS_JS = `(function () {
-  var meta = document.querySelector('meta[name="preact-mvc:route"]');
+  var meta = document.querySelector('meta[name="solid-mvc:route"]');
   var route = meta ? meta.content : 'overview';
   var depth = route === 'overview' ? 0 : route.split('/').filter(Boolean).length;
-  var verMeta = document.querySelector('meta[name="preact-mvc:version"]');
+  var verMeta = document.querySelector('meta[name="solid-mvc:version"]');
   // The mount dir is ground truth — the version segment sits right before
   // the route segments (docs/v<x.y.z>/<route>/), so it works under any
   // Pages base prefix.

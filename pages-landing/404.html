@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PreactMVC — page not found</title>
+    <title>SolidMVC — page not found</title>
     <style>
       body {
         margin: 0; min-height: 100vh; display: grid; place-items: center;
@@ -28,7 +28,7 @@
       var m = p.match(/^(\/docs\/[^/]+\/)(.+)$/);
       if (m) {
         location.replace(
-          m[1] + '?__pmvc_path=' + encodeURIComponent(m[2] + location.search + location.hash)
+          m[1] + '?__smvc_path=' + encodeURIComponent(m[2] + location.search + location.hash)
         );
       } else {
         // The docs site lives at <root>/docs/<route>/. A miss one level under

@@ -8,14 +8,14 @@ export function Views() {
       <p class="lead">
         A view is a class extending <code>View</code>, decorated with{' '}
         <code>@Component</code>, constructed once inside its own injector
-        scope by the framework's JSX interop — never by Preact directly.
+        scope by the framework's createComponent seam — never by Solid directly.
       </p>
 
       <h2>Anatomy</h2>
       <CodeBlock
         file="profile.view.tsx"
         language="tsx"
-        code={`import { Component, View, inject, signal } from '@preact-mvc/core';
+        code={`import { Component, View, inject, signal } from '@solid-mvc/core';
 import { UserService } from './user.service';
 
 @Component()
@@ -44,11 +44,13 @@ export class ProfileView extends View<{ userId: string }> {
       <h2>The rules</h2>
       <ul>
         <li>
-          <strong>Views are classes, not hooks.</strong> A vnode-interception
-          layer in <code>installViewInterop()</code> (called by{' '}
-          <code>bootstrap</code>) converts every JSX-referenced View subclass
-          into a host component that constructs the class inside a fresh
-          injector scope. <code>render()</code> stays hook-free.
+          <strong>Views are classes, not hooks.</strong> JSX compiles
+          against <code>@solid-mvc/core/web</code>, whose{' '}
+          <code>createComponent</code> routes every JSX-referenced View
+          subclass through <code>viewComponent()</code> — a host component
+          that constructs the class inside a fresh injector scope. Solid
+          never instantiates them itself; <code>render()</code> stays
+          hook-free.
         </li>
         <li>
           <strong><code>inject()</code> belongs in field initializers or the
@@ -57,14 +59,17 @@ export class ProfileView extends View<{ userId: string }> {
           boilerplate.
         </li>
         <li>
-          <strong><code>render()</code> reads signals and props.</strong>{' '}
-          Signal reads inside render subscribe the view — writes re-render
-          just that view. No state hooks, no deps arrays, no stale closures.
+          <strong><code>render()</code> runs once; JSX tracks.</strong>{' '}
+          Signal reads inside JSX expressions, attributes,{' '}
+          <code>&lt;For&gt;</code>/<code>&lt;Show&gt;</code> update exactly
+          the DOM that read them — no re-render, no deps arrays, no stale
+          closures. Eager reads in the render body are snapshots.
         </li>
         <li>
-          <strong>Props are construction-visible.</strong> The host assigns
-          props before the constructor finishes, so field initializers can
-          derive state from them (<code>View&lt;Props&gt;</code> types them).
+          <strong>Props are construction-visible and reactive.</strong> The
+          host assigns a getter-backed props object before the constructor
+          finishes — field initializers read initial values, JSX reads stay
+          live (<code>View&lt;Props&gt;</code> types them).
         </li>
       </ul>
 
@@ -92,10 +97,10 @@ export class ProfileView extends View<{ userId: string }> {
         </tbody>
       </table>
       <p>
-        Activation is commit-time synchronous (a <code>useLayoutEffect</code>{' '}
-        under the hood), so <code>onInit</code>/<code>onDestroy</code> always
-        pair correctly — even for a view that mounts and unmounts within the
-        same tick, like a fast redirect. <code>DestroyRef.onDestroy</code>{' '}
+        Activation is synchronous with the host mount, so{' '}
+        <code>onInit</code>/<code>onDestroy</code> always pair correctly —
+        even for a view that mounts and unmounts within the same tick, like
+        a fast redirect. <code>DestroyRef.onDestroy</code>{' '}
         callbacks run at the same moment for anything not implementing the
         interface.
       </p>

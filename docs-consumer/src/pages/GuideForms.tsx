@@ -98,8 +98,8 @@ export class SettingsView extends View {
         <li>
           <strong>Field state lives off the render path.</strong> Typing
           writes a signal — no synthetic form context, no controlled-input
-          re-render cascades (the view re-renders, but inputs keep DOM focus
-          naturally).
+          re-render cascades (updates are fine-grained, so inputs keep DOM
+          focus naturally).
         </li>
         <li>
           <strong>Validation is a plain function call.</strong>{' '}

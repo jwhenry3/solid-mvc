@@ -1,5 +1,5 @@
-import { Controller, inject, signal } from '@preact-mvc/core';
-import type { OnInit } from '@preact-mvc/core';
+import { Controller, inject, signal } from '@solid-mvc/core';
+import type { OnInit } from '@solid-mvc/core';
 import { SessionService } from '../core/session.service';
 import { TodoStore } from './todo.store';
 

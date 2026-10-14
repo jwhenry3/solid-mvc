@@ -1,8 +1,8 @@
-# @preact-mvc/atoll
+# @solid-mvc/atoll
 
-[![CI](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jwhenry3/preact-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/preact-mvc)
-[![Socket Badge](https://badge.socket.dev/npm/package/@preact-mvc/atoll)](https://badge.socket.dev/npm/package/@preact-mvc/atoll)
+[![CI](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jwhenry3/solid-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/solid-mvc)
+[![Socket Badge](https://badge.socket.dev/npm/package/@solid-mvc/atoll)](https://badge.socket.dev/npm/package/@solid-mvc/atoll)
 
 Framework-free worker-rendered islands, modeled on
 [Atoll](https://jwhenry3.github.io/atolljs/): a facade over
@@ -10,14 +10,14 @@ Framework-free worker-rendered islands, modeled on
 as an ordinary element. The worker renders against a proxy DOM; commits
 stream back over `postMessage` as ops the main-thread driver replays as
 real DOM. Nothing in this package knows about the framework — that's what
-`@preact-mvc/atoll-island` adds.
+`@solid-mvc/atoll-island` adds.
 
-**[PreactMVC — islands documentation](https://jwhenry3.github.io/preact-mvc/docs/islands/)**
+**[SolidMVC — islands documentation](https://jwhenry3.github.io/solid-mvc/docs/islands/)**
 
 ## Install
 
 ```bash
-npm install @preact-mvc/atoll
+npm install @solid-mvc/atoll
 ```
 
 ## The contract is the shared module
@@ -28,7 +28,7 @@ one file both threads import:
 
 ```ts
 // ticker.contract.ts
-import { defineIslandContract, z } from '@preact-mvc/atoll';
+import { defineIslandContract, z } from '@solid-mvc/atoll';
 
 export const tickerContract = defineIslandContract({
   app: 'ticker',
@@ -46,7 +46,7 @@ export const tickerContract = defineIslandContract({
 ## Shell side
 
 ```ts
-import { mountIsland, connectIslandWorker, callbackProp } from '@preact-mvc/atoll';
+import { mountIsland, connectIslandWorker, callbackProp } from '@solid-mvc/atoll';
 ```
 
 - `mountIsland` — mount a registered worker app into a host element.
@@ -55,7 +55,7 @@ import { mountIsland, connectIslandWorker, callbackProp } from '@preact-mvc/atol
 - `islandApp`, `defineIslandContract`, `isIslandContract`, `z` — the
   registry/contract API re-exported from `@atolljs/islands` +
   `@atolljs/core`.
-- `@preact-mvc/atoll/worker` — the worker-side entry (proxy DOM,
+- `@solid-mvc/atoll/worker` — the worker-side entry (proxy DOM,
   instance dispatcher); import it only in worker code.
 
 Rules of the wire: props and event payloads must be `structuredClone`-able;

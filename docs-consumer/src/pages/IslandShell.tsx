@@ -7,7 +7,7 @@ export function IslandShell() {
       <article>
         <h1>Shell &amp; mounting</h1>
         <p class="lead">
-          The shell side is <code>@preact-mvc/atoll-island</code> (the package
+          The shell side is <code>@solid-mvc/atoll-island</code> (the package
           root): mount an island as an element, pass props and callbacks,
           receive events. Three mounting surfaces cover the common cases.
         </p>
@@ -21,7 +21,7 @@ export function IslandShell() {
         </p>
         <CodeBlock
           language="tsx"
-          code={`import { islandComponent } from '@preact-mvc/atoll-island';
+          code={`import { islandComponent } from '@solid-mvc/atoll-island';
 import { tickerContract } from './ticker.contract';
 
 const Ticker = islandComponent(tickerContract);
@@ -46,8 +46,8 @@ const Ticker = islandComponent(tickerContract);
         <h2>&lt;Island&gt; — the primitive</h2>
         <CodeBlock
           language="tsx"
-          code={`import { Island } from '@preact-mvc/atoll-island';
-import type { WorkerLike } from '@preact-mvc/atoll-island';
+          code={`import { Island } from '@solid-mvc/atoll-island';
+import type { WorkerLike } from '@solid-mvc/atoll-island';
 
 const tickerWorker = (): WorkerLike =>
   new Worker(new URL('./ticker.worker.tsx', import.meta.url), {
@@ -80,7 +80,7 @@ const tickerWorker = (): WorkerLike =>
         </p>
         <CodeBlock
           language="tsx"
-          code={`import { connectIslandWorker, Island } from '@preact-mvc/atoll-island';
+          code={`import { connectIslandWorker, Island } from '@solid-mvc/atoll-island';
 
 const client = connectIslandWorker({
   worker: () =>
@@ -137,7 +137,7 @@ const client = connectIslandWorker({
   onEvent: (name, p) => console.log(name, p),
 });
 
-handle.updateProps({ source: 'payments' }); // re-render with new props
+handle.updateProps({ source: 'payments' }); // re-sync with new props
 handle.destroy();                            // teardown + worker cleanup`}
         />
 

@@ -8,7 +8,7 @@
  * ThemeService stays on the main thread — it needs document/matchMedia —
  * and arrives as props.
  */
-import { QueryClient } from '@tanstack/preact-query';
+import { QueryClient } from '@tanstack/query-core';
 import { syncQueryClient } from '@/lib/broadcast-query';
 import { FakeApi } from '@/services/fake-api.service';
 

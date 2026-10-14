@@ -19,7 +19,7 @@ export function GuideIntegrations() {
       </p>
       <CodeBlock
         file="query.module.ts"
-        code={`import { QueryClient, type QueryClientConfig } from '@tanstack/preact-query';
+        code={`import { QueryClient, type QueryClientConfig } from '@tanstack/query-core';
 
 // Same pattern as RouterModule.forRoot: an object carrying __module
 // metadata can sit in 'imports' — no decorator needed.
@@ -53,8 +53,8 @@ export class AppModule {}`}
       </p>
       <CodeBlock
         file="query.ts"
-        code={`import { signal, getCurrentInjector, DestroyRef } from '@preact-mvc/core';
-import { QueryObserver, type QueryObserverOptions } from '@tanstack/preact-query';
+        code={`import { signal, getCurrentInjector, DestroyRef } from '@solid-mvc/core';
+import { QueryObserver, type QueryObserverOptions } from '@tanstack/query-core';
 
 // Call inside construction — the scope's DestroyRef owns the observer.
 export function querySignal<T>(
@@ -90,16 +90,17 @@ export function querySignal<T>(
       <CodeBlock
         file="chart.tsx"
         language="tsx"
-        code={`import { useRef, useEffect } from 'preact/hooks';
+        code={`import { createEffect, onCleanup } from 'solid-js';
 import * as echarts from 'echarts';
 
-export function Chart({ option }: { option: echarts.EChartsOption }) {
-  const el = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const chart = echarts.init(el.current!);
-    chart.setOption(option);
-    return () => chart.dispose();       // element-bound cleanup
-  }, [option]);
+export function Chart(props: { option: echarts.EChartsOption }) {
+  let el!: HTMLDivElement;
+  const chart = () => echarts.getInstanceByDom(el)!;
+  createEffect(() => {
+    if (!chart()) echarts.init(el);
+    chart().setOption(props.option);      // tracked — re-applies on change
+  });
+  onCleanup(() => chart()?.dispose());    // element-bound cleanup
   return <div ref={el} style="width:100%;height:100%" />;
 }`}
       />

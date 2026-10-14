@@ -1,8 +1,6 @@
-import { h } from 'preact';
-import { render, screen, fireEvent, cleanup } from '@testing-library/preact';
-import { act } from 'preact/test-utils';
+import { render, screen, fireEvent, cleanup } from '@solidjs/testing-library';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { signal } from '@preact/signals';
+import { signal } from './signals';
 import { Injector } from './injector';
 import { inject } from './injector';
 import { InjectorContext } from './context';
@@ -10,8 +8,12 @@ import { View } from './view';
 import { Component, Module } from './decorators';
 import { createModuleInjector } from './module';
 
-function mount(node: any, injector = new Injector()) {
-  return render(h(InjectorContext.Provider, { value: injector }, node));
+// Solid children evaluate eagerly at the JSX site — pass a THUNK so the
+// view's createComponent call lands inside the Provider's context owner.
+function mount(node: () => any, injector = new Injector()) {
+  return render(() => (
+    <InjectorContext.Provider value={injector}>{node()}</InjectorContext.Provider>
+  ));
 }
 
 afterEach(() => cleanup());
@@ -24,7 +26,7 @@ class Greeting extends View {
 
 describe('class-based views', () => {
   it('renders a View subclass anywhere a vnode can appear', () => {
-    mount(<Greeting />);
+    mount(() => <Greeting />);
     expect(screen.getByText('hello from class view')).toBeTruthy();
   });
 
@@ -40,7 +42,7 @@ describe('class-based views', () => {
     }
     const inj = new Injector();
     inj.provide(Svc);
-    mount(<V />, inj);
+    mount(() => <V />, inj);
     expect(screen.getByText('injected')).toBeTruthy();
   });
 
@@ -51,11 +53,9 @@ describe('class-based views', () => {
         return <button onClick={() => this.n.value++}>n={this.n.value}</button>;
       }
     }
-    mount(<V />);
+    mount(() => <V />);
     expect(screen.getByText('n=0')).toBeTruthy();
-    await act(async () => {
-      fireEvent.click(screen.getByText('n=0'));
-    });
+    fireEvent.click(screen.getByText('n=0'));
     expect(screen.getByText('n=1')).toBeTruthy();
   });
 
@@ -69,8 +69,7 @@ describe('class-based views', () => {
         return <p>v</p>;
       }
     }
-    const r = mount(<V />);
-    await act(async () => {});
+    const r = mount(() => <V />);
     expect(onInit).toHaveBeenCalledTimes(1);
     r.unmount();
     expect(onDestroy).toHaveBeenCalledTimes(1);
@@ -88,8 +87,7 @@ describe('class-based views', () => {
         return <p>v</p>;
       }
     }
-    mount(<V />);
-    await act(async () => {});
+    mount(() => <V />);
     expect(onInit).toHaveBeenCalledTimes(1);
   });
 
@@ -105,7 +103,7 @@ describe('class-based views', () => {
       }
     }
     // Svc is NOT provided in the parent scope — only at the view level.
-    mount(<V />);
+    mount(() => <V />);
     expect(document.querySelector('p')!.textContent).not.toBe('');
   });
 
@@ -115,7 +113,7 @@ describe('class-based views', () => {
         return <p>{this.props.label}</p>;
       }
     }
-    mount(<V label="prop value" />);
+    mount(() => <V label="prop value" />);
     expect(screen.getByText('prop value')).toBeTruthy();
   });
 
@@ -135,15 +133,10 @@ describe('class-based views', () => {
         return <Child />;
       }
     }
-    mount(<Parent />);
+    mount(() => <Parent />);
     expect(screen.getByText('from parent scope')).toBeTruthy();
   });
 
-  it('setState/forceUpdate throw a signal-oriented error', () => {
-    const v = new Greeting();
-    expect(() => v.setState()).toThrow(/signal/);
-    expect(() => v.forceUpdate()).toThrow(/signal/);
-  });
 });
 
 describe('@Component declarations', () => {
@@ -170,7 +163,7 @@ describe('@Component declarations', () => {
         );
       }
     }
-    mount(<Parent />);
+    mount(() => <Parent />);
     const parentId = screen.getByTestId('parent').textContent;
     const childId = screen.getByTestId('child').textContent;
     expect(parentId).toBe(childId); // child resolved parent's instance
@@ -188,7 +181,7 @@ describe('@Component declarations', () => {
         return <p data-testid="v">{this.c.id}</p>;
       }
     }
-    mount(
+    mount(() => 
       <div>
         <V />
         <V />
@@ -212,7 +205,7 @@ describe('@Component declarations', () => {
       }
     }
     // Standalone is declared in NO module — mounts under a bare injector.
-    mount(<Standalone />);
+    mount(() => <Standalone />);
     expect(screen.getByText('imported')).toBeTruthy();
   });
 
@@ -230,7 +223,7 @@ describe('@Component declarations', () => {
         return <Owned />;
       }
     }
-    mount(<Standalone />);
+    mount(() => <Standalone />);
     expect(await screen.findByText('owned rendered')).toBeTruthy();
   });
 });
@@ -246,7 +239,7 @@ describe('module ownership enforcement', () => {
     @Module({ components: [Owned] })
     class M {}
     // Rendered under a bare injector — M is not an ancestor.
-    mount(<Owned />);
+    mount(() => <Owned />);
     expect(await screen.findByText(/failed to mount/)).toBeTruthy();
     expect(screen.getByText(/declared by M/)).toBeTruthy();
     errSpy.mockRestore();
@@ -261,7 +254,7 @@ describe('module ownership enforcement', () => {
     @Module({ components: [Owned] })
     class M {}
     const inj = createModuleInjector(M, new Injector());
-    mount(<Owned />, inj);
+    mount(() => <Owned />, inj);
     expect(await screen.findByText('owned ok')).toBeTruthy();
   });
 
@@ -276,12 +269,12 @@ describe('module ownership enforcement', () => {
     @Module({ imports: [SharedMod] })
     class FeatureMod {}
     const inj = createModuleInjector(FeatureMod, new Injector());
-    mount(<Shared />, inj);
+    mount(() => <Shared />, inj);
     expect(await screen.findByText('shared ok')).toBeTruthy();
   });
 
   it('undeclared views mount freely anywhere', () => {
-    mount(<Greeting />);
+    mount(() => <Greeting />);
     expect(screen.getByText('hello from class view')).toBeTruthy();
   });
 });
@@ -294,7 +287,7 @@ describe('error boundary', () => {
         throw new Error('kaboom');
       }
     }
-    mount(
+    mount(() => 
       <div>
         <p>sibling</p>
         <Bad />
@@ -316,7 +309,7 @@ describe('error boundary', () => {
         return <p>never</p>;
       }
     }
-    mount(<NeedsDep />);
+    mount(() => <NeedsDep />);
     expect(await screen.findByText(/failed to mount/)).toBeTruthy();
     expect(screen.getByText(/No provider for Missing/)).toBeTruthy();
     errSpy.mockRestore();

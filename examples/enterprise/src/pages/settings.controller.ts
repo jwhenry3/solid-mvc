@@ -1,4 +1,4 @@
-import { Controller, signal } from '@preact-mvc/core';
+import { Controller, signal } from '@solid-mvc/core';
 import { z } from 'zod';
 
 /**

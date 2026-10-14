@@ -1,7 +1,7 @@
 /**
  * `pmvc serve|build|test` — delegate to the project's vite/vitest, the
  * `ng serve` / `ng build` / `ng test` equivalents. All args pass through
- * to the underlying tool except the few pmvc owns (--watch for test,
+ * to the underlying tool except the few smvc owns (--watch for test,
  * --no-typecheck for build).
  */
 import { existsSync } from 'node:fs';
@@ -10,7 +10,7 @@ import { findProjectRoot, readJson, run, fail } from '../lib.mjs';
 
 function projectRoot() {
   const found = findProjectRoot();
-  if (!found) fail('not inside a PreactMVC project (no @preact-mvc/core dependency found)');
+  if (!found) fail('not inside a SolidMVC project (no @solid-mvc/core dependency found)');
   return found.root;
 }
 

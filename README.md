@@ -1,47 +1,47 @@
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/preactmvc-dark-t.svg" width="380">
-    <img alt="PreactMVC" src="assets/preactmvc-light-t.svg" width="380">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/solidmvc-dark-t.svg" width="380">
+    <img alt="SolidMVC" src="assets/solidmvc-light-t.svg" width="380">
   </picture>
 </p>
 
 
-[![CI](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jwhenry3/preact-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/preact-mvc)
-[![Socket Badge](https://badge.socket.dev/npm/package/@preact-mvc/core)](https://badge.socket.dev/npm/package/@preact-mvc/core)
+[![CI](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jwhenry3/solid-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/solid-mvc)
+[![Socket Badge](https://badge.socket.dev/npm/package/@solid-mvc/core)](https://badge.socket.dev/npm/package/@solid-mvc/core)
 
-# PreactMVC
+# SolidMVC
 
-Angular-inspired architecture on Preact: modules, dependency injection, and
+Angular-inspired architecture on Solid: modules, dependency injection, and
 decorators + MVC organization + class-based JSX views + signal reactivity.
 Optionally, worker-rendered islands that run views inside Web Workers.
-Views render as ordinary Preact vnodes, so every Preact library — and via
-`preact/compat`, much of React's — works unchanged.
+Views render as ordinary Solid JSX, so every Solid library works
+unchanged.
 
 <p align="center">
-  <img alt="Angular's architecture converges with Preact's freedom in PreactMVC" src="assets/preactmvc-convergence.png" width="1100">
+  <img alt="Angular's architecture converges with Solid's freedom in SolidMVC" src="assets/solidmvc-convergence.png" width="1100">
 </p>
 
 | Package | Role |
 |---|---|
-| `@preact-mvc/core` | The framework: `View`, `inject()`, `@Module`/`@Component`/`@Injectable`/`@Controller`, signals, `DestroyRef`, router |
-| `@preact-mvc/atoll` | Facade over `@atolljs/islands` + `@atolljs/core`: op protocol, proxy DOM, worker runtime, main-thread driver |
-| `@preact-mvc/atoll-island` | The `*-island` adapter: `<Island/>`/`islandComponent`/`lazyIsland` on the shell, `viewIslandApp`/`defineViewPolyWorker` on the worker |
-| `@preact-mvc/cli` | The `pmvc` binary: `new`, `generate`, `serve`/`build`/`test`, `add`, `update` |
+| `@solid-mvc/core` | The framework: `View`, `inject()`, `@Module`/`@Component`/`@Injectable`/`@Controller`, signals, `DestroyRef`, router |
+| `@solid-mvc/atoll` | Facade over `@atolljs/islands` + `@atolljs/core`: op protocol, proxy DOM, worker runtime, main-thread driver |
+| `@solid-mvc/atoll-island` | The `*-island` adapter: `<Island/>`/`islandComponent`/`lazyIsland` on the shell, `viewIslandApp`/`defineViewPolyWorker` on the worker |
+| `@solid-mvc/cli` | The `smvc` binary: `new`, `generate`, `serve`/`build`/`test`, `add`, `update` |
 
 ## Quick start
 
 ```bash
-npm install -g @preact-mvc/cli   # the pmvc binary
+npm install -g @solid-mvc/cli   # the smvc binary
 pmvc new my-app --islands        # scaffold a routed app (+ worker islands)
-cd my-app && pmvc serve
+cd my-app && smvc serve
 ```
 
 Or by hand:
 
 ```tsx
 // main.tsx
-import { bootstrap } from '@preact-mvc/core';
+import { bootstrap } from '@solid-mvc/core';
 import { AppModule } from './app.module';
 
 bootstrap(AppModule, document.getElementById('app')!);
@@ -49,7 +49,7 @@ bootstrap(AppModule, document.getElementById('app')!);
 
 ```ts
 // app.module.ts
-import { Module, RouterModule } from '@preact-mvc/core';
+import { Module, RouterModule } from '@solid-mvc/core';
 import { AppShell } from './app.shell';
 import { routes } from './app.routes';
 import { API_URL } from './tokens';
@@ -64,15 +64,17 @@ export class AppModule {}
 
 ## Views
 
-Views are classes extending `View`. They are never instantiated by Preact:
-a vnode interceptor constructs each view once per mount inside a fresh child
-injector, so `inject()` in field initializers resolves against that view's
-scope. `render()` reads signals; reads are auto-tracked and re-render the
-view on change. Do not call `setState`/`forceUpdate` (they throw) and do not
-use hooks inside `render()`.
+Views are classes extending `View`. They are never instantiated by Solid:
+the JSX runtime module (`@solid-mvc/core/web`) routes each view class through
+`createComponent` into a host that constructs it once per mount inside a
+fresh child injector, so `inject()` in field initializers resolves against
+that view's scope. `render()` runs once; signal reads inside JSX
+expressions update the DOM that read them — Solid's fine-grained tracking,
+no diff pass. Do not call `setState`/`forceUpdate` (they throw) and do not
+use Solid hooks inside `render()`.
 
 ```tsx
-import { Component, View, signal, computed } from '@preact-mvc/core';
+import { Component, View, signal, computed } from '@solid-mvc/core';
 
 @Component()
 export class CounterView extends View {
@@ -105,7 +107,7 @@ only when that class is constructed by the framework (a view mount,
 injector chain: view scope -> module scopes -> root.
 
 ```ts
-import { Injectable, InjectionToken } from '@preact-mvc/core';
+import { Injectable, InjectionToken } from '@solid-mvc/core';
 
 // App-wide singleton regardless of who injects it.
 @Injectable({ providedIn: 'root' })
@@ -180,12 +182,13 @@ exist outside any declaring module.
 
 ## Signals
 
-`signal`, `computed`, `batch`, `untracked` are re-exported from
-`@preact/signals`. `effect` is augmented: created inside a constructor or
-field initializer it registers its disposer on the enclosing scope and dies
-at `onDestroy`; outside an injection context it is the raw primitive and you
-must dispose it yourself. Declare field-initializer effects *below* the
-signals they read, since effects run once immediately at construction.
+`signal`, `computed`, `batch`, `untracked` wrap Solid's reactive
+primitives while keeping the `.value` surface. `effect` is augmented:
+created inside a constructor or field initializer it registers its disposer
+on the enclosing scope and dies at `onDestroy`; outside an injection
+context you must dispose it yourself. Declare field-initializer effects
+*below* the signals they read, since effects run once immediately at
+construction.
 
 ## Router
 
@@ -225,9 +228,10 @@ nest by prefix-match: each `<RouterOutlet/>` renders one chain level, so
 the parent view stays mounted while children swap; `Router.params` merges
 params from every level.
 
-The router rides `preact-router` underneath: `navigate()` goes through
-`route()` so foreign preact-router routers update too, and `route()` calls
-or plain `<a href>` clicks from outside the framework drive ours back.
+The router owns navigation itself: `navigate()` wraps `pushState`,
+`popstate` restores back/forward, and a document-level interceptor claims
+same-origin `<a href>` clicks so plain anchors route without a `Link`.
+Listeners live on the router's injector scope and detach on destroy.
 
 **Base path**: the router derives its mount prefix from `document.baseURI`
 at construction, so the same bundle works at `/` or nested under
@@ -235,8 +239,9 @@ at construction, so the same bundle works at `/` or nested under
 
 ## Function components
 
-Views and plain Preact function components mix freely. Function components
-get real Preact semantics (hooks legal) plus scope-aware helpers:
+Views and plain Solid function components mix freely. Function components
+get real Solid semantics (`onMount`, `createMemo`, `useContext`) plus
+scope-aware helpers:
 
 ```tsx
 const theme = useService(ThemeService);      // resolve from the ambient injector
@@ -247,16 +252,15 @@ const ctrl = useController(TodoController);  // fresh instance owned by this mou
 </Provide>                                    // subtree-local providers
 ```
 
-## The Preact ecosystem, unchanged
+## The Solid ecosystem, unchanged
 
-`render()` returns ordinary Preact vnodes, so anything that works in a
-Preact app works here — no adapter packages:
+`render()` returns ordinary Solid JSX, so anything that works in a Solid
+app works here — no adapter packages:
 
-- **Any Preact component or library** drops straight into view JSX —
-  icon sets, UI kits, form controls, `preact/compat` for the React
-  ecosystem. Function components keep their hooks.
-- **Signal-aware libraries** subscribe directly: the framework's signals
-  are `@preact/signals`.
+- **Any Solid component or library** drops straight into view JSX —
+  icon sets, UI kits, form controls, `<For>`/`<Show>` control flow.
+- **Fine-grained by construction**: the framework's signals wrap Solid's
+  own reactive graph — updates land on the DOM that read them.
 - **Everything else** is two moves — provide the client object through DI
   (`{ provide: QueryClient, useValue: client }`), bridge its `subscribe`
   into a signal bound to the scope's `DestroyRef`. DOM-bound libraries
@@ -270,7 +274,7 @@ DOM.
 
 ## Islands (worker-rendered views)
 
-`@preact-mvc/atoll-island` renders `View` classes inside a Web Worker
+`@solid-mvc/atoll-island` renders `View` classes inside a Web Worker
 against a proxy DOM (the AtollJS engine under the hood); commits stream
 back as ops the driver replays onto real DOM. Three pieces:
 
@@ -278,7 +282,7 @@ back as ops the driver replays onto real DOM. Three pieces:
 
 ```ts
 // island.worker.ts
-import { defineViewPolyWorker } from '@preact-mvc/atoll-island/worker';
+import { defineViewPolyWorker } from '@solid-mvc/atoll-island/worker';
 import { CounterIsland } from './island-apps';
 
 export const worker = defineViewPolyWorker({
@@ -293,8 +297,8 @@ export const worker = defineViewPolyWorker({
 **Shell side**:
 
 ```tsx
-import { Island, islandComponent, connectIslandWorker } from '@preact-mvc/atoll-island';
-import type { WorkerLike } from '@preact-mvc/atoll-island';
+import { Island, islandComponent, connectIslandWorker } from '@solid-mvc/atoll-island';
+import type { WorkerLike } from '@solid-mvc/atoll-island';
 
 // The literal new URL(..., import.meta.url) is what the bundler detects.
 const islandEntry = (): WorkerLike =>
@@ -321,7 +325,7 @@ and both sides consume it:
 
 ```ts
 // counter.contract.ts — imported by the shell AND the worker entry
-import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const counterContract = defineIslandContract({
   app: 'counter',
@@ -338,7 +342,7 @@ const Counter = islandComponent(counterContract);
 
 ```ts
 // worker entry — attach the same contract for schema-checked props/emits
-import { viewIslandApp } from '@preact-mvc/atoll-island/worker';
+import { viewIslandApp } from '@solid-mvc/atoll-island/worker';
 export const worker = defineViewPolyWorker({
   apps: { counter: viewIslandApp(CounterIsland, { contract: counterContract }) },
 });
@@ -358,9 +362,9 @@ DOM into a `data-atoll-slot` box.
 ## Repository layout
 
 ```
-packages/core/         @preact-mvc/core
-packages/atoll/        @preact-mvc/atoll
-packages/atoll-island/ @preact-mvc/atoll-island
+packages/core/         @solid-mvc/core
+packages/atoll/        @solid-mvc/atoll
+packages/atoll-island/ @solid-mvc/atoll-island
 src/app/               demo app (todos / counter / hello / islands)
 examples/enterprise/   separate Vite app consuming the packages by name
 docs-consumer/         docs site app

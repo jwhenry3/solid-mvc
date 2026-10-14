@@ -4,8 +4,9 @@
  * signals. The controller lives in settings.controller.ts; this file is
  * the projection only.
  */
-import { Component, View, inject } from '@preact-mvc/core';
-import { Check } from 'lucide-preact';
+import { For } from 'solid-js';
+import { Component, View, inject } from '@solid-mvc/core';
+import Check from 'lucide-solid/icons/check';
 import { SettingsController, type SettingsForm } from './settings.controller';
 import type { Theme } from '@/services/theme.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
@@ -130,16 +131,17 @@ export class SettingsView extends View<{
           <CardContent class="space-y-3">
             <Separator />
             <div class="flex items-center gap-2 pt-2">
-              {(['light', 'dark', 'system'] as Theme[]).map((t) => (
-                <Button
-                  key={t}
-                  variant={this.props.theme === t ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => this.props.onThemeChange?.(t)}
-                >
-                  {t}
-                </Button>
-              ))}
+              <For each={['light', 'dark', 'system'] as Theme[]}>
+                {(t) => (
+                  <Button
+                    variant={this.props.theme === t ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => this.props.onThemeChange?.(t)}
+                  >
+                    {t}
+                  </Button>
+                )}
+              </For>
             </div>
           </CardContent>
         </Card>

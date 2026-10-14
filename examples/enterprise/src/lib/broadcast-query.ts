@@ -26,7 +26,7 @@ import {
   partialMatchKey,
   type DehydratedState,
   type QueryKey,
-} from '@tanstack/preact-query';
+} from '@tanstack/query-core';
 
 /**
  * The shared vocabulary: query-key prefixes worth crossing thread

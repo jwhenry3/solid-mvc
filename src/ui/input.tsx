@@ -1,7 +1,7 @@
-import type { ComponentChildren, JSX } from 'preact';
+import type { JSX } from 'solid-js';
 import { cn } from '@/lib/cn';
 
-export function Input({ class: c, ...p }: JSX.IntrinsicElements['input'] & { children?: ComponentChildren }): ComponentChildren {
+export function Input({ class: c, ...p }: JSX.IntrinsicElements['input'] & { children?: JSX.Element }): JSX.Element {
   return (
     <input
       class={cn(
@@ -13,7 +13,7 @@ export function Input({ class: c, ...p }: JSX.IntrinsicElements['input'] & { chi
   );
 }
 
-export function Label({ class: c, ...p }: JSX.IntrinsicElements['label'] & { children?: ComponentChildren }): ComponentChildren {
+export function Label({ class: c, ...p }: JSX.IntrinsicElements['label'] & { children?: JSX.Element }): JSX.Element {
   return (
     <label
       class={cn('text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70', c)}

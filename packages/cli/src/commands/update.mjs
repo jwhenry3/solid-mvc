@@ -1,5 +1,5 @@
 /**
- * `pmvc update` — bump @preact-mvc/* dependencies, the `ng update`
+ * `pmvc update` — bump @solid-mvc/* dependencies, the `ng update`
  * equivalent. Flags: --to <version>, --include-atoll, -d/--dry-run,
  * --skip-install.
  *
@@ -24,7 +24,7 @@ import * as T from '../templates.mjs';
 
 function project() {
   const found = findProjectRoot();
-  if (!found) fail('not inside a PreactMVC project (no @preact-mvc/core dependency found)');
+  if (!found) fail('not inside a SolidMVC project (no @solid-mvc/core dependency found)');
   return found;
 }
 
@@ -44,7 +44,7 @@ export function cmdUpdate(a) {
       if (d.startsWith('@atolljs/')) targets.add(d);
     }
   }
-  if (targets.size === 0) fail('no @preact-mvc/* dependencies in this project');
+  if (targets.size === 0) fail('no @solid-mvc/* dependencies in this project');
 
   const to = a.to === true ? null : a.to; // `--to v` or nothing
   const changes = [];
@@ -60,7 +60,7 @@ export function cmdUpdate(a) {
   }
 
   if (changes.length === 0) {
-    log('All @preact-mvc dependencies are already at the target version.');
+    log('All @solid-mvc dependencies are already at the target version.');
     return;
   }
   log('');
@@ -109,12 +109,56 @@ function patchViteConfig(root, dry) {
   }
   const next = src
     .replace(
-      /(import preact from '@preact\/preset-vite';)/,
+      /(import solidPlugin from 'vite-plugin-solid';)/,
       `$1\nimport tailwindcss from '@tailwindcss/vite';`,
     )
-    .replace(/plugins:\s*\[preact\(\)/, 'plugins: [preact(), tailwindcss()');
+    .replace(/(plugins:\s*\[[\s\S]*?)(\n\s*)\]/, '$1    tailwindcss(),$2]');
   if (next === src) {
     warn('vite.config.ts has an unrecognized shape — add `tailwindcss()` to plugins manually');
+    return;
+  }
+  log(`      UPDATE   vite.config.ts`);
+  if (!dry) writeFileSync(path, next);
+}
+
+/** Wire worker-island JSX plumbing into a generated-shape vite.config. */
+function patchViteConfigIslands(root, dry) {
+  const path = join(root, 'vite.config.ts');
+  if (!existsSync(path)) {
+    warn('no vite.config.ts — wire `workerUniversalTag()` + a `worker:` block manually');
+    return;
+  }
+  let src = readFileSync(path, 'utf8');
+  if (src.includes('workerUniversalTag')) {
+    log('      SKIP     vite.config.ts (worker islands already configured)');
+    return;
+  }
+  let next = src
+    .replace(
+      /(import solidPlugin from 'vite-plugin-solid';)/,
+      `$1\nimport { WORKER_FILES, workerUniversalTag } from '@solid-mvc/atoll-island/vite';`,
+    )
+    .replace(/\nconst WORKER_FILES = [^\n]+;\n?/, '\n')
+    .replace(/(plugins:\s*\[\s*)/, '$1workerUniversalTag(),\n    ');
+  if (!/worker:\s*\{/.test(next)) {
+    next = next.replace(
+      /(export default defineConfig\(\{)/,
+      `$1
+  worker: {
+    // Vite does NOT inherit config.plugins for worker bundles — island .tsx
+    // would fall back to esbuild classic JSX without the plugin here.
+    format: 'es',
+    plugins: () => [
+      solidPlugin({
+        solid: { generate: 'universal', moduleName: '@solid-mvc/atoll-island/worker' },
+        babel: BABEL,
+      }),
+    ],
+  },`,
+    );
+  }
+  if (next === src) {
+    warn('vite.config.ts has an unrecognized shape — wire worker islands manually');
     return;
   }
   log(`      UPDATE   vite.config.ts`);
@@ -138,19 +182,20 @@ const RECIPES = {
   islands(root, a) {
     const fw = frameworkRange();
     installDeps(root, {
-      '@preact-mvc/atoll': fw,
-      '@preact-mvc/atoll-island': fw,
+      '@solid-mvc/atoll': fw,
+      '@solid-mvc/atoll-island': fw,
       '@atolljs/core': VERSIONS['@atolljs/core'],
     }, { dev: false, dry: a['dry-run'] });
+    patchViteConfigIslands(root, a['dry-run']);
     log('\nWorker islands installed. Scaffold your first one:');
-    log('  pmvc g island ticker');
+    log('  smvc g island ticker');
   },
 };
 
 export function cmdAdd(a) {
   const recipe = a._[0];
   if (!recipe || !RECIPES[recipe]) {
-    fail(`usage: pmvc add <${Object.keys(RECIPES).join('|')}>`);
+    fail(`usage: smvc add <${Object.keys(RECIPES).join('|')}>`);
   }
   const { root } = project();
   log('');

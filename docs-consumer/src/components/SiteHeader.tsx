@@ -1,3 +1,4 @@
+import { For } from 'solid-js';
 import { docsRootHref, routeDepth } from '../link';
 
 /**
@@ -41,7 +42,7 @@ export function SiteHeader() {
       <a class="site-brand" href={href.docs}>
         <img src={`${docsRootHref()}favicon.svg`} alt="" />
         <span class="site-brand-name">
-          PREACT<span class="site-brand-js">MVC</span>
+          SOLID<span class="site-brand-js">MVC</span>
         </span>
       </a>
       <nav class="site-tabs" aria-label="Sites">
@@ -56,7 +57,7 @@ export function SiteHeader() {
       <select
         class="version-switch"
         aria-label="Docs version"
-        defaultValue={VERSION}
+        value={VERSION}
         // One baked option can't switch anything: docs.js reveals the
         // select once versions.json proves snapshots exist.
         hidden={!versioned}
@@ -64,17 +65,15 @@ export function SiteHeader() {
           location.href = versionHref((e.target as HTMLSelectElement).value);
         }}
       >
-        {(versioned ? [VERSION, 'latest'] : ['latest']).map((v) => (
-          <option key={v} value={v}>
-            {v}
-          </option>
-        ))}
+        <For each={versioned ? [VERSION, 'latest'] : ['latest']}>
+          {(v) => <option value={v}>{v}</option>}
+        </For>
       </select>
       <nav class="site-ext" aria-label="External">
-        <a href="https://preactjs.com">Preact</a>
+        <a href="https://www.solidjs.com">Solid</a>
         <a href="https://angular.dev">Angular</a>
-        <a href="https://github.com/jwhenry3/preact-mvc">GitHub</a>
-        <a href="https://www.npmjs.com/org/preact-mvc">npm</a>
+        <a href="https://github.com/jwhenry3/solid-mvc">GitHub</a>
+        <a href="https://www.npmjs.com/org/solid-mvc">npm</a>
       </nav>
     </header>
   );

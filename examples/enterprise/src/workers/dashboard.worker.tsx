@@ -11,7 +11,7 @@
 import {
   defineViewPolyWorker,
   viewIslandApp,
-} from '@preact-mvc/atoll-island/worker';
+} from '@solid-mvc/atoll-island/worker';
 import { pageProviders } from '@/workers/shared';
 import { DashboardView } from '@/pages/dashboard.view';
 

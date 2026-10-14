@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, effect, DestroyRef } from '@preact-mvc/core';
+import { Injectable, inject, signal, effect, DestroyRef } from '@solid-mvc/core';
 
 export type Theme = 'light' | 'dark' | 'system';
 

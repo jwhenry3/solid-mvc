@@ -1,5 +1,5 @@
-// Builds the PreactMVC asset family from the Preact mark
-// (preact-logo.svg — the official CC0 mark from simple-icons): the
+// Builds the SolidMVC asset family from the Solid mark
+// (solid-logo.svg — the official CC0 mark from simple-icons): the
 // orbit swirl + nucleus, held inside an Angular-style SHIELD instead of
 // the cube hexagon.
 //
@@ -13,13 +13,13 @@ import { dirname, join } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 
 // ── source art extraction ──────────────────────────────────────────────
-// The mark's path is one `d` whose subpaths are: nucleus circle, two
-// orbit-band segments, and finally the cube hexagon `M 12,0 22.392,6 ...`.
-// Everything before the last `M ` is the white swirl — that is what we
-// keep; the hexagon is discarded in favour of the shield.
-const SRC = readFileSync(join(here, 'preact-logo.svg'), 'utf8')
+// The Solid mark (solid-logo.svg — the official CC0 mark from
+// simple-icons) is a single path: two subpaths forming the stacked
+// swoosh. No shell geometry to strip — the whole mark rides inside our
+// Angular-style shield.
+const SRC = readFileSync(join(here, 'solid-logo.svg'), 'utf8')
   .match(/d="([^"]+)"/)[1];
-const SWIRL = SRC.slice(0, SRC.lastIndexOf('M ')).trim();
+const SWIRL = SRC.trim();
 
 // Angular-style shield in the same 24×24 space the cube occupied:
 // rounded peak and lower side corners (Q curves); pointed shoulder
@@ -30,10 +30,10 @@ const SHIELD =
   'L 18.97,12.57 Q 18.78,14.26 17.11,15.19 L 12,18.05 ' +
   'L 6.89,15.19 Q 5.22,14.26 5.03,12.57 L 4.2,5.3 Z';
 
-// The orbit was drawn to kiss the cube's flat sides; the shield narrows
-// mid-height, so scale the swirl to sit inside (0.7) AND recenter it on
-// the shield's visual center (12,10.1) rather than the square's (12,12).
-const SWIRL_T = 'translate(3.6 1.7) scale(0.7)';
+// The swoosh fills its 24×24 viewBox edge-to-edge; the shield narrows
+// mid-height, so scale it to sit inside AND recenter it on the shield's
+// visual center (12,10.1) rather than the square's (12,12).
+const SWIRL_T = 'translate(6.6 4.75) scale(0.45)';
 
 // ── mark on the 500×550 canvas (scale 15) ─────────────────────────────
 // The shield's own center is y=10.1 in the 24-unit space, so translate
@@ -60,10 +60,10 @@ function markKnockout(ink) {
 const TEXT = (ink) => `
   <text x="250" y="445" font-family="system-ui, -apple-system, sans-serif"
         font-weight="800" font-size="38" fill="${ink}" text-anchor="middle"
-        letter-spacing="1">Preact<tspan fill="#673ab8">MVC</tspan></text>
+        letter-spacing="1">Solid<tspan fill="#673ab8">MVC</tspan></text>
   <text x="250" y="480" font-family="system-ui, -apple-system, sans-serif"
         font-weight="600" font-size="14" fill="${ink}" text-anchor="middle"
-        letter-spacing="3">ANGULAR-STYLE MVC ON PREACT</text>`;
+        letter-spacing="3">ANGULAR-STYLE MVC ON SOLID</text>`;
 
 // ── variants ────────────────────────────────────────────────────────────
 const PURPLE = '#673ab8';
@@ -83,34 +83,34 @@ const themed = (bg0, bg1, ink, viewBox = '0 0 500 550') =>
   );
 
 // full logo — lavender wash / deep violet panel, brand purple shield
-writeFileSync(join(here, 'preactmvc-light.svg'), themed('#f2edfc', '#dcd0f5', '#3c1d95'));
-writeFileSync(join(here, 'preactmvc-dark.svg'), themed('#2e1a5e', '#150a33', '#e6ddff'));
+writeFileSync(join(here, 'solidmvc-light.svg'), themed('#f2edfc', '#dcd0f5', '#3c1d95'));
+writeFileSync(join(here, 'solidmvc-dark.svg'), themed('#2e1a5e', '#150a33', '#e6ddff'));
 
 // transparent full logo — mark + wordmark, no panel (for themed pages)
 writeFileSync(
-  join(here, 'preactmvc-light-t.svg'),
+  join(here, 'solidmvc-light-t.svg'),
   svg('0 0 500 550', mark(PURPLE, ORBIT) + TEXT('#3c1d95'))
 );
 writeFileSync(
-  join(here, 'preactmvc-dark-t.svg'),
+  join(here, 'solidmvc-dark-t.svg'),
   svg('0 0 500 550', mark(PURPLE, ORBIT) + TEXT('#e6ddff'))
 );
 
 // compact — artwork region only, square crop with even margins (shield
 // bounds x133–367 / y84.75–365.25 on the canvas, center 250,225)
-writeFileSync(join(here, 'preactmvc-compact-light.svg'), themed('#f2edfc', '#dcd0f5', '#3c1d95', '80 55 340 340'));
-writeFileSync(join(here, 'preactmvc-compact-dark.svg'), themed('#2e1a5e', '#150a33', '#e6ddff', '80 55 340 340'));
+writeFileSync(join(here, 'solidmvc-compact-light.svg'), themed('#f2edfc', '#dcd0f5', '#3c1d95', '80 55 340 340'));
+writeFileSync(join(here, 'solidmvc-compact-dark.svg'), themed('#2e1a5e', '#150a33', '#e6ddff', '80 55 340 340'));
 
 // favicon — mark only, no text, tight 1:1 square bounding the shield.
 // The orbit is transparent (knock-out) so a single file works on light
 // and dark browser chrome alike. `-white` is for brand-colored bars
 // (the orbit shows the bar's purple through).
 writeFileSync(
-  join(here, 'preactmvc-icon.svg'),
+  join(here, 'solidmvc-icon.svg'),
   svg('100 75 300 300', markKnockout(PURPLE))
 );
 writeFileSync(
-  join(here, 'preactmvc-icon-white.svg'),
+  join(here, 'solidmvc-icon-white.svg'),
   svg('100 75 300 300', markKnockout('#ffffff'))
 );
 
@@ -123,12 +123,12 @@ const horizontal = (ink) =>
 ${mark(PURPLE, ORBIT)}
   </g>
   <text x="200" y="115" font-family="system-ui, -apple-system, sans-serif"
-        font-weight="800" font-size="58" fill="${ink}" letter-spacing="1">Preact<tspan fill="${PURPLE}">MVC</tspan></text>
+        font-weight="800" font-size="58" fill="${ink}" letter-spacing="1">Solid<tspan fill="${PURPLE}">MVC</tspan></text>
   <text x="203" y="152" font-family="system-ui, -apple-system, sans-serif"
-        font-weight="600" font-size="17" fill="${ink}" letter-spacing="2.6">ANGULAR-STYLE MVC ON PREACT</text>`
+        font-weight="600" font-size="17" fill="${ink}" letter-spacing="2.6">ANGULAR-STYLE MVC ON SOLID</text>`
   );
-writeFileSync(join(here, 'preactmvc-horizontal-light.svg'), horizontal('#3c1d95'));
-writeFileSync(join(here, 'preactmvc-horizontal-dark.svg'), horizontal('#e6ddff'));
+writeFileSync(join(here, 'solidmvc-horizontal-light.svg'), horizontal('#3c1d95'));
+writeFileSync(join(here, 'solidmvc-horizontal-dark.svg'), horizontal('#e6ddff'));
 
 // brand lockup — mark + wordmark sized so the text fills the icon's height.
 const brand = (ink) =>
@@ -139,18 +139,18 @@ const brand = (ink) =>
 ${mark(PURPLE, ORBIT)}
   </g>
   <text x="212" y="172" font-family="system-ui, -apple-system, sans-serif"
-        font-weight="800" font-size="96" fill="${ink}" letter-spacing="1">Preact<tspan fill="${PURPLE}">MVC</tspan></text>
+        font-weight="800" font-size="96" fill="${ink}" letter-spacing="1">Solid<tspan fill="${PURPLE}">MVC</tspan></text>
   <text x="216" y="225" font-family="system-ui, -apple-system, sans-serif"
-        font-weight="600" font-size="30" fill="${ink}" letter-spacing="2.4">ANGULAR-STYLE MVC ON PREACT</text>`
+        font-weight="600" font-size="30" fill="${ink}" letter-spacing="2.4">ANGULAR-STYLE MVC ON SOLID</text>`
   );
-writeFileSync(join(here, 'preactmvc-brand-light.svg'), brand('#3c1d95'));
-writeFileSync(join(here, 'preactmvc-brand-dark.svg'), brand('#e6ddff'));
+writeFileSync(join(here, 'solidmvc-brand-light.svg'), brand('#3c1d95'));
+writeFileSync(join(here, 'solidmvc-brand-dark.svg'), brand('#e6ddff'));
 
 // social card — 1200×630 og:image. Dark panel + brand lockup centered;
 // rasterize with --window-size=1200,630 (the opaque dark panel reads on
 // light and dark chat/social themes alike).
 writeFileSync(
-  join(here, 'preactmvc-social.svg'),
+  join(here, 'solidmvc-social.svg'),
   svg(
     '0 0 1200 630',
     `
@@ -163,15 +163,15 @@ writeFileSync(
 ${mark(PURPLE, ORBIT)}
     </g>
     <text x="212" y="172" font-family="system-ui, -apple-system, sans-serif"
-          font-weight="800" font-size="96" fill="#e6ddff" letter-spacing="1">Preact<tspan fill="${PURPLE}">MVC</tspan></text>
+          font-weight="800" font-size="96" fill="#e6ddff" letter-spacing="1">Solid<tspan fill="${PURPLE}">MVC</tspan></text>
     <text x="216" y="225" font-family="system-ui, -apple-system, sans-serif"
-          font-weight="600" font-size="30" fill="#e6ddff" letter-spacing="2.4">ANGULAR-STYLE MVC ON PREACT</text>
+          font-weight="600" font-size="30" fill="#e6ddff" letter-spacing="2.4">ANGULAR-STYLE MVC ON SOLID</text>
   </g>`,
   ),
 );
 
 // monochrome mark — single-color glyph for badges/inline use; the orbit
 // is a knock-out so it works over any background.
-writeFileSync(join(here, 'preactmvc-mark.svg'), svg('100 75 300 300', markKnockout('currentColor')));
+writeFileSync(join(here, 'solidmvc-mark.svg'), svg('100 75 300 300', markKnockout('currentColor')));
 
-console.log('wrote preactmvc-{light,dark}.svg, preactmvc-{light,dark}-t.svg, preactmvc-compact-{light,dark}.svg, preactmvc-icon{,-white}.svg, preactmvc-horizontal-{light,dark}.svg, preactmvc-brand-{light,dark}.svg, preactmvc-mark.svg, preactmvc-social.svg');
+console.log('wrote solidmvc-{light,dark}.svg, solidmvc-{light,dark}-t.svg, solidmvc-compact-{light,dark}.svg, solidmvc-icon{,-white}.svg, solidmvc-horizontal-{light,dark}.svg, solidmvc-brand-{light,dark}.svg, solidmvc-mark.svg, solidmvc-social.svg');

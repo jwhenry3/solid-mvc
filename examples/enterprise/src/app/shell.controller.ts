@@ -1,5 +1,5 @@
-import { Controller, computed, inject } from '@preact-mvc/core';
-import { QueryClient, skipToken } from '@tanstack/preact-query';
+import { Controller, computed, inject } from '@solid-mvc/core';
+import { QueryClient, skipToken } from '@tanstack/query-core';
 import { querySignal } from '@/lib/query';
 import type { Metric } from '@/services/fake-api.service';
 

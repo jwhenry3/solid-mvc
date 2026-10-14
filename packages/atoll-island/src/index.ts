@@ -1,7 +1,7 @@
 /**
- * `@preact-mvc/atoll-island` — the `*-island` package's shell surface
+ * `@solid-mvc/atoll-island` — the `*-island` package's shell surface
  * (docs/atoll/islands-frameworks.md): mount a worker-hosted island tree as
- * an ordinary element in a PreactMVC app. The worker-side renderer
+ * an ordinary element in a SolidMVC app. The worker-side renderer
  * (viewIslandApp, defineViewPolyWorker) lives in the `./worker` entry.
  *
  * The facade pattern: a contract module (`defineIslandContract`) names the
@@ -9,7 +9,7 @@
  * view imports the contract only and mounts `islandComponent(contract)`
  * with no worker plumbing at the call site.
  *
- * The driver/mount API is re-exported from `@preact-mvc/atoll` so shell
+ * The driver/mount API is re-exported from `@solid-mvc/atoll` so shell
  * code only needs this one package.
  */
 export { Island, islandComponent, lazyIsland } from './shell';
@@ -31,7 +31,7 @@ export {
   mountIsland,
   withContract,
   z,
-} from '@preact-mvc/atoll';
+} from '@solid-mvc/atoll';
 export type {
   ConnectOptions,
   IslandAppProps,
@@ -46,4 +46,4 @@ export type {
   MountOptions,
   Schema,
   WorkerLike,
-} from '@preact-mvc/atoll';
+} from '@solid-mvc/atoll';

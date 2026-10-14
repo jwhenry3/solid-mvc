@@ -1,7 +1,7 @@
 # The docs site and GitHub Pages deploy
 
 The consumer-facing documentation lives in `docs-consumer/`, a Vite +
-Preact app modeled on the Atoll `docs-consumer/` architecture. It is
+Solid app modeled on the Atoll `docs-consumer/` architecture. It is
 deployed to GitHub Pages together with a static landing page and the two
 live demo apps. This doc describes the moving parts.
 
@@ -56,8 +56,10 @@ Atoll's docs, which ship a cross-origin-isolation shim).
 ## The docs app (docs-consumer/)
 
 - `src/App.tsx` — the route table and shell (header, sidebar, article).
-  Routes are plain objects `{ id, path, label, section, element }`.
-- `src/ssg.tsx` — exports `ROUTES` and `renderRoute(id)` for prerendering.
+  Routes are plain objects `{ id, label, page }` over lazy JSX.
+- `src/ssg.tsx` — exports `ROUTES` and `renderRoute(id)` for prerendering
+  (Solid `renderToString` from `solid-js/web`; vite-plugin-solid's
+  `ssr: true` compiles the `vite build --ssr` pass for SSR output).
 - `src/routeMeta.ts` — per-route `<title>`, description, canonical URL.
   `metaFor` qualifies non-root pages labeled "Overview" (e.g. `islands`
   becomes "Islands overview") so titles stay unique.
@@ -67,7 +69,7 @@ Atoll's docs, which ship a cross-origin-isolation shim).
 - `prerender.mjs` — runs after the Vite builds: loads `dist-ssg/ssg.js`,
   emits `dist/<route>/index.html` per route with meta injected into the
   HTML template, plus `robots.txt`, `sitemap.xml`, and `docs.js` (a tiny
-  vanilla-JS nav enhancer; the emitted pages do not ship a Preact
+  vanilla-JS nav enhancer; the emitted pages do not ship a Solid
   runtime). Every route gets `og:*`/`twitter:*` tags including
   `summary_large_image`; `og:image`/`twitter:image` are
   `${DOCS_BASE_URL}social.png`, which each build serves from its own
@@ -127,7 +129,7 @@ immutable copy of the whole docs tree (pages + demo mounts) as a
   `DOCS_BASE_URL=<pages origin>/docs/<ver>/`, tars `mountDocsTree`'s
   output, and `gh release upload`s it.
 - `prerender.mjs` reads `VITE_DOCS_VERSION` into
-  `<meta name="preact-mvc:version">` on every page and adds
+  `<meta name="solid-mvc:version">` on every page and adds
   `robots: noindex` on snapshot builds so immutable copies never outrank
   latest.
 - `docs.js` derives the live version from the mount path (the `v<x.y.z>`

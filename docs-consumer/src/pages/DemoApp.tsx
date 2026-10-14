@@ -48,7 +48,7 @@ export function DemoApp() {
             <td><code>/island</code></td>
             <td>
               Three islands on ONE shared worker client: counter (click →
-              event → worker re-render), clock (out-of-task pushes), a
+              event → worker re-sync), clock (out-of-task pushes), a
               dynamically spawned fourth. The milestone emit lands in the
               shell's event log. See{' '}
               <a href={docHref('islands')}>Islands</a>.

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * pmvc — the PreactMVC CLI. Angular-CLI-shaped: new / generate /
+ * smvc — the SolidMVC CLI. Angular-CLI-shaped: new / generate /
  * serve / build / test / add / update / version / docs.
  *
  * Dependency-free on purpose: the CLI must run before a project has
- * node_modules, and it ships runnable .mjs (other @preact-mvc packages
+ * node_modules, and it ships runnable .mjs (other @solid-mvc packages
  * ship ./src/*.ts for bundler resolution — a bin needs JS).
  */
 import { execSync } from 'node:child_process';
@@ -13,9 +13,9 @@ import { cmdNew } from './commands/new.mjs';
 import { cmdGenerate } from './commands/generate.mjs';
 import { cmdBuild, cmdServe, cmdTest } from './commands/run.mjs';
 import { cmdAdd, cmdUpdate } from './commands/update.mjs';
-const HELP = `pmvc — the PreactMVC CLI
+const HELP = `pmvc — the SolidMVC CLI
 
-Usage: pmvc <command> [args] [flags]
+Usage: smvc <command> [args] [flags]
 
 Project creation
   new <dir>                 Scaffold a new application
@@ -43,7 +43,7 @@ Build & dev (delegates to the project's vite/vitest)
 
 Maintenance
   add <recipe>              Install + wire an integration: tailwind | islands
-  update                    Bump @preact-mvc/* deps to latest (or --to <ver>)
+  update                    Bump @solid-mvc/* deps to latest (or --to <ver>)
     --include-atoll           also bump @atolljs/* deps
     -d / --skip-install
 
@@ -54,7 +54,7 @@ Other
 `;
 
 function cmdVersion() {
-  log(`@preact-mvc/cli ${cliVersion()}`);
+  log(`@solid-mvc/cli ${cliVersion()}`);
   const found = findProjectRoot();
   if (found) {
     const deps = { ...found.pkg.dependencies, ...found.pkg.devDependencies };
@@ -62,13 +62,13 @@ function cmdVersion() {
       log(`  ${dep}: ${deps[dep]}`);
     }
     if (deps['@atolljs/core']) log(`  @atolljs/core: ${deps['@atolljs/core']}`);
-    if (deps.preact) log(`  preact: ${deps.preact}`);
+    if (deps['solid-js']) log(`  solid-js: ${deps['solid-js']}`);
     if (deps.vite) log(`  vite: ${deps.vite}`);
   }
 }
 
 function cmdDocs(a) {
-  const url = 'https://github.com/jwhenry3/preact-mvc';
+  const url = 'https://github.com/jwhenry3/solid-mvc';
   if (a.open) {
     try {
       const opener =

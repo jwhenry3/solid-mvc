@@ -15,22 +15,24 @@ import { fileURLToPath } from 'node:url';
 export const CLI_ROOT = dirname(fileURLToPath(import.meta.url));
 
 /* ── Versions ───────────────────────────────────────────────────────
- * External dep ranges for generated projects. @preact-mvc/* ranges come
+ * External dep ranges for generated projects. @solid-mvc/* ranges come
  * from the CLI's own version (the published package releases in
  * lockstep) — 0.0.0 means "unreleased checkout", so fall back to
  * `latest` for local/linked runs.
  */
 export const VERSIONS = {
-  preact: '^10.24.0',
-  '@preact/signals': '^1.3.0',
-  '@preact/preset-vite': '^2.9.0',
-  '@atolljs/core': '0.1.11',
+  'solid-js': '^1.9.10',
+  'vite-plugin-solid': '^2.11.9',
+  '@babel/core': '^7.26.0',
+  '@babel/plugin-proposal-decorators': '^7.25.9',
+  '@babel/plugin-transform-class-properties': '^7.25.9',
+  '@atolljs/core': '0.1.12',
   typescript: '~5.5.0',
   vite: '^6.4.3',
   vitest: '^3.2.4',
   jsdom: '^25.0.0',
   '@types/node': '^24.19.2',
-  '@testing-library/preact': '^3.2.4',
+  '@solidjs/testing-library': '^0.8.10',
   tailwindcss: '^4.3.3',
   '@tailwindcss/vite': '^4.3.3',
 };
@@ -42,7 +44,7 @@ export function cliVersion() {
   return pkg.version;
 }
 
-/** The range a generated project should use for @preact-mvc/* deps. */
+/** The range a generated project should use for @solid-mvc/* deps. */
 export function frameworkRange() {
   const v = cliVersion();
   return v === '0.0.0' ? 'latest' : `^${v}`;
@@ -123,7 +125,7 @@ export function readJson(path) {
 }
 
 /** Walk up from `dir` to the nearest package.json depending on
- *  @preact-mvc/core — the project's root. Returns {root, pkg} or null. */
+ *  @solid-mvc/core — the project's root. Returns {root, pkg} or null. */
 export function findProjectRoot(dir = process.cwd()) {
   let cur = resolve(dir);
   for (;;) {
@@ -131,7 +133,7 @@ export function findProjectRoot(dir = process.cwd()) {
     if (existsSync(pkgPath)) {
       const pkg = readJson(pkgPath);
       const deps = { ...pkg.dependencies, ...pkg.devDependencies };
-      if (deps['@preact-mvc/core']) return { root: cur, pkg };
+      if (deps['@solid-mvc/core']) return { root: cur, pkg };
     }
     const parent = dirname(cur);
     if (parent === cur) return null;
@@ -139,10 +141,10 @@ export function findProjectRoot(dir = process.cwd()) {
   }
 }
 
-/** All @preact-mvc/* dep names declared in a package.json object. */
+/** All @solid-mvc/* dep names declared in a package.json object. */
 export function frameworkDeps(pkg) {
   return Object.keys({ ...pkg.dependencies, ...pkg.devDependencies }).filter(
-    (d) => d.startsWith('@preact-mvc/'),
+    (d) => d.startsWith('@solid-mvc/'),
   );
 }
 

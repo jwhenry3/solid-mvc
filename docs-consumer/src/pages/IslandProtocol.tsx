@@ -14,9 +14,9 @@ export function IslandProtocol() {
       <p>
         That engine is the real Atoll: <code>@atolljs/islands</code> +{' '}
         <code>@atolljs/core</code> implement the op protocol, proxy DOM,
-        instance lifecycle, and driver. <code>@preact-mvc/atoll</code> is a
+        instance lifecycle, and driver. <code>@solid-mvc/atoll</code> is a
         thin facade that re-exports them with our transport defaults, and{' '}
-        <code>@preact-mvc/atoll-island</code> adds the framework binding.
+        <code>@solid-mvc/atoll-island</code> adds the framework binding.
       </p>
 
       <h2>The op protocol</h2>
@@ -42,7 +42,7 @@ export function IslandProtocol() {
       <h2>The proxy DOM</h2>
       <p>
         Inside the worker, <code>document</code> resolves to a{' '}
-        <code>ProxyDocument</code> — enough of the DOM surface for Preact to
+        <code>ProxyDocument</code> — enough of the DOM surface for the universal renderer to
         render against (<code>createElement</code>,{' '}
         <code>createTextNode</code>, <code>insertBefore</code>,{' '}
         <code>removeChild</code>, <code>data</code>, <code>innerHTML</code>,{' '}
@@ -51,7 +51,7 @@ export function IslandProtocol() {
       </p>
       <CodeBlock
         side="worker"
-        code={`// Inside the worker, this Preact render:
+        code={`// Inside the worker, this Solid render:
 <button onClick={inc}>count: {n}</button>
 
 // …serializes to roughly:
@@ -68,14 +68,14 @@ export function IslandProtocol() {
         Each mounted island is an instance keyed <code>app@N</code> with its
         own op queue, handler table, and proxy document. Ambient{' '}
         <code>document</code> in worker code resolves through the
-        active-instance dispatcher: inside a Preact render or an event
-        handler, the current instance is tracked explicitly (a render-scope
-        hook tags vnodes), so concurrent islands in one worker never cross
-        streams.
+        active-instance dispatcher: each mounted app registers its proxy
+        document and <code>enterInstance</code> scopes DOM evaluation
+        (renders, event handlers, out-of-task writes), so concurrent
+        islands in one worker never cross streams.
       </p>
       <p>
         Timer/signal-driven updates happen <em>outside</em> any dispatched
-        task: signal writes re-render the island, the instance re-enters its
+        task: tracked writes re-sync the island, the instance re-enters its
         scope, and the op batch pushes to the shell unsolicited — that's why
         a worker clock keeps ticking with zero shell involvement.
       </p>
@@ -85,8 +85,8 @@ export function IslandProtocol() {
         The driver attaches real listeners for every <code>listen</code> op.
         A DOM event serializes into a small payload (type, target node id,
         plus the fields islands care about) and posts to the worker, which
-        looks up the handler id and invokes the Preact listener — the same
-        function the app registered.
+        looks up the handler id and invokes the registered listener — the
+        same function the app attached.
       </p>
 
       <h2>Mount lifecycle</h2>
@@ -128,7 +128,8 @@ export function IslandProtocol() {
       </p>
       <blockquote>
         <p>
-          Deep internals — per-instance state, the render-scope tracking, the
+          Deep internals — per-instance state, instance-scoped document
+          resolution, the
           event-name bridge — live in the repo's{' '}
           <code>docs/islands.md</code>. This page is the consumer-facing
           model; that doc is the invariant list.

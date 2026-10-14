@@ -8,7 +8,7 @@
 //
 // The snapshot is the FULL docs tree (docs pages + demo mounts), so its
 // iframes and assets resolve inside v<x.y.z>/ and the archive is
-// self-contained. VITE_DOCS_VERSION stamps <meta preact-mvc:version> and
+// self-contained. VITE_DOCS_VERSION stamps <meta solid-mvc:version> and
 // a robots noindex into every page so snapshots never outrank latest.
 //
 // Env overrides are set on this process — the build children inherit them.
@@ -33,7 +33,7 @@ const slug = (process.env.GITHUB_REPOSITORY ??
   /github\.com[/:]([\w.-]+\/[\w.-]+?)(?:\.git)?$/.exec(
     JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).repository?.url ?? ''
   )?.[1] ??
-  'jwhenry3/preact-mvc'
+  'jwhenry3/solid-mvc'
 ).split('/');
 const [owner, repo] = slug;
 

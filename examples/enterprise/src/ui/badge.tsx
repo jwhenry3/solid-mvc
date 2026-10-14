@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import type { ComponentChildren, JSX } from 'preact';
+import type { JSX } from 'solid-js';
 import { cn } from '@/lib/cn';
 
 const badgeVariants = cva(
@@ -20,8 +20,8 @@ const badgeVariants = cva(
 );
 
 export type BadgeProps = JSX.IntrinsicElements['span'] &
-  VariantProps<typeof badgeVariants> & { children?: ComponentChildren };
+  VariantProps<typeof badgeVariants> & { children?: JSX.Element };
 
-export function Badge({ class: c, variant, ...p }: BadgeProps): ComponentChildren {
+export function Badge({ class: c, variant, ...p }: BadgeProps): JSX.Element {
   return <span class={cn(badgeVariants({ variant }), c)} {...p} />;
 }

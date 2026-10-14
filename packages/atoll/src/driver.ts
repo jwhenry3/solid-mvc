@@ -1,5 +1,5 @@
 /**
- * `@preact-mvc/atoll` shell surface — a thin facade over `@atolljs/islands`
+ * `@solid-mvc/atoll` shell surface — a thin facade over `@atolljs/islands`
  * (docs/atoll/islands.md). The op protocol, proxy DOM, instance lifecycle,
  * and op-replay driver are the real package now; this file only normalizes
  * the worker option (an already-created WorkerLike counts as an entry, the
@@ -95,7 +95,7 @@ export interface MountOptions extends IslandWorkerOptions {
    * `worker:` mounts); 'poll' (the default here) needs none.
    */
   mode?: Mode;
-  /** Devtools renderer tag ('preact-mvc'); the adapter sets it. */
+  /** Devtools renderer tag ('solid-mvc'); the adapter sets it. */
   framework?: string;
   mountTimeout?: number;
   /** This mount's destroy() leaves the client resident-but-idle. */

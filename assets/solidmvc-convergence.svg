@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#2e1a5e"/><stop offset="100%" stop-color="#150a33"/>
+    </radialGradient>
+    <linearGradient id="bAngular" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff7a7a"/>
+      <stop offset="100%" stop-color="#e23237" stop-opacity="0.25"/>
+    </linearGradient>
+    <linearGradient id="bSolid" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#76b3e1"/>
+      <stop offset="60%" stop-color="#76b3e1" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#b39ddb" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="bMvc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b39ddb"/>
+      <stop offset="100%" stop-color="#673ab8" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="rowPos" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rowNeg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rowConv" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b39ddb" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#b39ddb" stop-opacity="0"/>
+    </linearGradient>
+    <path id="tick" d="M0 5 L3.5 8.5 L10 0" fill="none" stroke="#4ade80" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <g id="cross" stroke="#f87171" stroke-width="2.4" stroke-linecap="round"><path d="M0 0 L8 8 M8 0 L0 8" fill="none"/></g>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="600" y="52" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif"
+        font-weight="700" font-size="26" fill="#dcd0f5" letter-spacing="5">TWO PHILOSOPHIES. ONE FRAMEWORK.</text>
+
+  <!-- ══ Angular card ══ -->
+  <g>
+    <rect x="60" y="76" width="500" height="306" rx="14" fill="#1e0f42" stroke="url(#bAngular)" stroke-width="2"/>
+    <g transform="translate(86 88) scale(1.3)"><path d="M16.712 17.711H7.288l-1.204 2.916L12 24l5.916-3.373-1.204-2.916ZM14.692 0l7.832 16.855.814-12.856L14.692 0ZM9.308 0 .662 3.999l.814 12.856L9.308 0Zm-.405 13.93h6.198L12 6.396 8.903 13.93Z" fill="#e23237"/></g>
+    <text x="130" y="116" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="800" font-size="28" fill="#ff5a5a" letter-spacing="1.5">ANGULAR</text>
+    <rect x="88" y="130" width="444" height="1" fill="#e23237" fill-opacity="0.35"/>
+
+    <text x="88" y="160" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="700" font-size="13" fill="#4ade80" letter-spacing="2.5">STRENGTHS</text>
+    <g font-family="system-ui, -apple-system, sans-serif" font-size="17" fill="#e6ddff">
+      <rect x="80" y="169" width="460" height="26" rx="6" fill="url(#rowPos)"/><use href="#tick" transform="translate(90 177) scale(1.15)"/><text x="110" y="188">Dependency injection &amp; modules</text>
+      <rect x="80" y="197" width="460" height="26" rx="6" fill="url(#rowPos)"/><use href="#tick" transform="translate(90 205) scale(1.15)"/><text x="110" y="216">Opinionated MVC structure</text>
+      <rect x="80" y="225" width="460" height="26" rx="6" fill="url(#rowPos)"/><use href="#tick" transform="translate(90 233) scale(1.15)"/><text x="110" y="244">Mature CLI &amp; enterprise patterns</text>
+    </g>
+
+    <text x="88" y="272" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="700" font-size="13" fill="#f87171" letter-spacing="2.5">TRADE-OFFS</text>
+    <g font-family="system-ui, -apple-system, sans-serif" font-size="17" fill="#b7a8dd">
+      <rect x="80" y="277" width="460" height="26" rx="6" fill="url(#rowNeg)"/><use href="#cross" transform="translate(91 286) scale(1.1)"/><text x="110" y="296">Proprietary patterns, steep curve</text>
+      <rect x="80" y="305" width="460" height="26" rx="6" fill="url(#rowNeg)"/><use href="#cross" transform="translate(91 314) scale(1.1)"/><text x="110" y="324">Ceremony &amp; boilerplate</text>
+      <rect x="80" y="333" width="460" height="26" rx="6" fill="url(#rowNeg)"/><use href="#cross" transform="translate(91 342) scale(1.1)"/><text x="110" y="352">Rigid component patterns</text>
+    </g>
+  </g>
+
+  <!-- ══ SolidJS card ══ -->
+  <g>
+    <rect x="640" y="76" width="500" height="306" rx="14" fill="#1e0f42" stroke="url(#bSolid)" stroke-width="2"/>
+    <g transform="translate(686 84) scale(1.4)"><path d="M11.558.788A9.082 9.082 0 0 0 9.776.99l-.453.15c-.906.303-1.656.755-2.1 1.348l-.301.452-2.035 3.528c.426-.387.974-.698 1.643-.894h.001l.613-.154h.001a8.82 8.82 0 0 1 1.777-.206c2.916-.053 6.033 1.148 8.423 2.36 2.317 1.175 3.888 2.32 3.987 2.39L24 5.518c-.082-.06-1.66-1.21-3.991-2.386-2.393-1.206-5.521-2.396-8.45-2.343zM8.924 5.366a8.634 8.634 0 0 0-1.745.203l-.606.151c-1.278.376-2.095 1.16-2.43 2.108-.334.948-.188 2.065.487 3.116.33.43.747.813 1.216 1.147L12.328 10h.001a6.943 6.943 0 0 1 6.013 1.013l2.844-.963c-.17-.124-1.663-1.2-3.91-2.34-2.379-1.206-5.479-2.396-8.352-2.344zm5.435 4.497a6.791 6.791 0 0 0-1.984.283L2.94 13.189 0 18.334l9.276-2.992a6.945 6.945 0 0 1 7.408 2.314v.001c.695.903.89 1.906.66 2.808l2.572-4.63c.595-1.041.45-2.225-.302-3.429a6.792 6.792 0 0 0-5.255-2.543zm-3.031 5.341a6.787 6.787 0 0 0-2.006.283L.008 18.492c.175.131 2.02 1.498 4.687 2.768 2.797 1.332 6.37 2.467 9.468 1.712l.454-.152h.002c1.278-.376 2.134-1.162 2.487-2.09.353-.93.207-2.004-.541-2.978a6.791 6.791 0 0 0-5.237-2.548z" fill="#76b3e1"/></g>
+    <text x="744" y="116" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="800" font-size="28" letter-spacing="1.5"><tspan fill="#76b3e1">SOLIDJS</tspan></text>
+    <rect x="668" y="130" width="444" height="1" fill="#76b3e1" fill-opacity="0.35"/>
+
+    <text x="668" y="160" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="700" font-size="13" fill="#4ade80" letter-spacing="2.5">STRENGTHS</text>
+    <g font-family="system-ui, -apple-system, sans-serif" font-size="17" fill="#e6ddff">
+      <rect x="660" y="169" width="460" height="26" rx="6" fill="url(#rowPos)"/><use href="#tick" transform="translate(670 177) scale(1.15)"/><text x="690" y="188">JSX freedom &amp; composability</text>
+      <rect x="660" y="197" width="460" height="26" rx="6" fill="url(#rowPos)"/><use href="#tick" transform="translate(670 205) scale(1.15)"/><text x="690" y="216">Fine-grained reactive primitives</text>
+      <rect x="660" y="225" width="460" height="26" rx="6" fill="url(#rowPos)"/><use href="#tick" transform="translate(670 233) scale(1.15)"/><text x="690" y="244">No virtual DOM — signals drive updates</text>
+    </g>
+
+    <text x="668" y="272" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="700" font-size="13" fill="#f87171" letter-spacing="2.5">TRADE-OFFS</text>
+    <g font-family="system-ui, -apple-system, sans-serif" font-size="17" fill="#b7a8dd">
+      <rect x="660" y="277" width="460" height="26" rx="6" fill="url(#rowNeg)"/><use href="#cross" transform="translate(671 286) scale(1.1)"/><text x="690" y="296">No built-in architecture</text>
+      <rect x="660" y="305" width="460" height="26" rx="6" fill="url(#rowNeg)"/><use href="#cross" transform="translate(671 314) scale(1.1)"/><text x="690" y="324">No DI or module boundaries</text>
+      <rect x="660" y="333" width="460" height="26" rx="6" fill="url(#rowNeg)"/><use href="#cross" transform="translate(671 342) scale(1.1)"/><text x="690" y="352">Structure drifts as apps scale</text>
+    </g>
+  </g>
+
+  <!-- ══ Convergence lines ══ -->
+  <g fill="none" stroke="#673ab8" stroke-width="3" stroke-opacity="0.8">
+    <path d="M 310,382 C 310,412 500,410 560,420"/>
+    <path d="M 890,382 C 890,412 700,410 640,420"/>
+  </g>
+  <circle cx="310" cy="382" r="3.5" fill="#e23237"/>
+  <circle cx="890" cy="382" r="3.5" fill="#76b3e1"/>
+  <circle cx="600" cy="420" r="5" fill="#673ab8"/>
+
+  <!-- ══ SolidMVC card ══ -->
+  <g>
+    <rect x="190" y="424" width="820" height="190" rx="14" fill="#241350" stroke="url(#bMvc)" stroke-width="2"/>
+    <g transform="translate(196 429) scale(0.23)"><mask id="mvc-mask"><path d="M 10.28,2.84 Q 12,2.15 13.72,2.84 L 19.8,5.3 L 18.97,12.57 Q 18.78,14.26 17.11,15.19 L 12,18.05 L 6.89,15.19 Q 5.22,14.26 5.03,12.57 L 4.2,5.3 Z" fill="#fff"/>
+    <g transform="translate(6.6 4.75) scale(0.45)"><path d="M11.558.788A9.082 9.082 0 0 0 9.776.99l-.453.15c-.906.303-1.656.755-2.1 1.348l-.301.452-2.035 3.528c.426-.387.974-.698 1.643-.894h.001l.613-.154h.001a8.82 8.82 0 0 1 1.777-.206c2.916-.053 6.033 1.148 8.423 2.36 2.317 1.175 3.888 2.32 3.987 2.39L24 5.518c-.082-.06-1.66-1.21-3.991-2.386-2.393-1.206-5.521-2.396-8.45-2.343zM8.924 5.366a8.634 8.634 0 0 0-1.745.203l-.606.151c-1.278.376-2.095 1.16-2.43 2.108-.334.948-.188 2.065.487 3.116.33.43.747.813 1.216 1.147L12.328 10h.001a6.943 6.943 0 0 1 6.013 1.013l2.844-.963c-.17-.124-1.663-1.2-3.91-2.34-2.379-1.206-5.479-2.396-8.352-2.344zm5.435 4.497a6.791 6.791 0 0 0-1.984.283L2.94 13.189 0 18.334l9.276-2.992a6.945 6.945 0 0 1 7.408 2.314v.001c.695.903.89 1.906.66 2.808l2.572-4.63c.595-1.041.45-2.225-.302-3.429a6.792 6.792 0 0 0-5.255-2.543zm-3.031 5.341a6.787 6.787 0 0 0-2.006.283L.008 18.492c.175.131 2.02 1.498 4.687 2.768 2.797 1.332 6.37 2.467 9.468 1.712l.454-.152h.002c1.278-.376 2.134-1.162 2.487-2.09.353-.93.207-2.004-.541-2.978a6.791 6.791 0 0 0-5.237-2.548z" fill="#000"/></g></mask><g transform="translate(70 73.5) scale(15)">
+    <path d="M 10.28,2.84 Q 12,2.15 13.72,2.84 L 19.8,5.3 L 18.97,12.57 Q 18.78,14.26 17.11,15.19 L 12,18.05 L 6.89,15.19 Q 5.22,14.26 5.03,12.57 L 4.2,5.3 Z" fill="#673ab8" mask="url(#mvc-mask)"/>
+  </g></g>
+    <text x="296" y="466" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="800" font-size="38" letter-spacing="0.5"><tspan fill="#e6ddff">Solid</tspan><tspan fill="#b39ddb">MVC</tspan></text>
+    <text x="298" y="496" font-family="system-ui, -apple-system, sans-serif"
+          font-weight="700" font-size="13" fill="#b39ddb" letter-spacing="2.5">THE CONVERGENCE</text>
+    <g font-family="system-ui, -apple-system, sans-serif" font-size="17" fill="#e6ddff">
+      <rect x="290" y="503" width="334" height="26" rx="6" fill="url(#rowConv)"/><use href="#tick" transform="translate(300 511) scale(1.15)"/><text x="320" y="522">Modules + dependency injection</text>
+      <rect x="290" y="531" width="334" height="26" rx="6" fill="url(#rowConv)"/><use href="#tick" transform="translate(300 539) scale(1.15)"/><text x="320" y="550">MVC controllers &amp; lifecycle</text>
+      <rect x="290" y="559" width="334" height="26" rx="6" fill="url(#rowConv)"/><use href="#tick" transform="translate(300 567) scale(1.15)"/><text x="320" y="578">Signal reactivity</text>
+      <rect x="642" y="503" width="346" height="26" rx="6" fill="url(#rowConv)"/><use href="#tick" transform="translate(652 511) scale(1.15)"/><text x="672" y="522">JSX views on SolidJS</text>
+      <rect x="642" y="531" width="346" height="26" rx="6" fill="url(#rowConv)"/><use href="#tick" transform="translate(652 539) scale(1.15)"/><text x="672" y="550">Class views + function components</text>
+      <rect x="642" y="559" width="346" height="26" rx="6" fill="url(#rowConv)"/><use href="#tick" transform="translate(652 567) scale(1.15)"/><text x="672" y="578">smvc CLI</text>
+    </g>
+  </g>
+</svg>

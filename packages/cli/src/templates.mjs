@@ -4,7 +4,7 @@
  * plain text; render() substitutes tokens and fails on leftovers.
  */
 
-/* ── pmvc new ──────────────────────────────────────────────────────── */
+/* ── smvc new ──────────────────────────────────────────────────────── */
 
 export const T_TSCONFIG = `{
   "compilerOptions": {
@@ -12,8 +12,8 @@ export const T_TSCONFIG = `{
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "strict": true,
@@ -32,40 +32,81 @@ export const T_TSCONFIG = `{
 export const T_VITE_CONFIG = `/// <reference types="vitest" />
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
-import preact from '@preact/preset-vite';
-%%TAILWIND_IMPORT%%export default defineConfig({
-  plugins: [preact()%%TAILWIND_PLUGIN%%],
-  resolve: {
-    alias: [{ find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) }],
+import solidPlugin from 'vite-plugin-solid';
+%%TAILWIND_IMPORT%%%%ISLANDS_VITE_IMPORT%%
+// Worker-side island code compiles for the universal renderer (the
+// atoll-island/worker runtime module); everything else compiles for the
+// DOM with @solid-mvc/core/web as the JSX runtime — its createComponent
+// is what mounts View classes from JSX.
+%%WORKER_FILES%%
+
+// Babel must transform decorators itself — vite-plugin-solid's pipeline
+// bypasses esbuild. legacy + loose class properties reproduces
+// tsconfig's experimentalDecorators semantics.
+const BABEL = {
+  plugins: [
+    ['@babel/plugin-proposal-decorators', { legacy: true }],
+    ['@babel/plugin-transform-class-properties', { loose: true }],
+  ],
+};
+
+export default defineConfig({
+  plugins: [
+    %%ISLANDS_TAG%%solidPlugin({
+      include: WORKER_FILES,
+      solid: { generate: 'universal', moduleName: '@solid-mvc/atoll-island/worker' },
+      babel: BABEL,
+    }),
+    solidPlugin({
+      exclude: WORKER_FILES,
+      solid: { moduleName: '@solid-mvc/core/web' },
+      babel: BABEL,
+    }),
+    %%TAILWIND_PLUGIN%%],
+  worker: {
+    // Vite does NOT inherit config.plugins for worker bundles — without
+    // this, island .tsx falls back to esbuild classic JSX (React.*). Every
+    // module reachable from a worker entry renders into the proxy DOM, so
+    // the whole bundle compiles universal — no file-glob split here.
+    // format: 'es' keeps import.meta alive for nested worker entries.
+    format: 'es',
+    plugins: () => [
+      solidPlugin({
+        solid: { generate: 'universal', moduleName: '@solid-mvc/atoll-island/worker' },
+        babel: BABEL,
+      }),
+    ],
   },
-  // Keep @preact-mvc/* out of dep prebundling: releases >= 0.1.1 ship
-  // compiled dist/, but 0.1.0 ships .ts/.tsx sources which esbuild's
-  // optimizer compiles with the classic React pragma ("React is not
-  // defined"). Excluded deps go through vite's transform instead —
-  // correct JSX either way — and stay in one module realm with the
-  // view interceptor's patched options object (same reason the vitest
-  // inline list exists below).
+  resolve: {
+    alias: [
+      { find: '@', replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+      // ONE solid-js realm — the node/worker export conditions pick the
+      // server build where effects never re-run, so pin the client build
+      // for every importer.
+      { find: /^solid-js$/, replacement: fileURLToPath(new URL('./node_modules/solid-js/dist/solid.js', import.meta.url)) },
+      { find: /^solid-js\\/web$/, replacement: fileURLToPath(new URL('./node_modules/solid-js/web/dist/web.js', import.meta.url)) },
+    ],
+  },
+  // Keep @solid-mvc/* out of dep prebundling: the vite transform must see
+  // their sources so JSX compiles against the right runtime module and
+  // everything stays in one module realm.
   optimizeDeps: {
-    exclude: ['@preact-mvc/core', '@preact-mvc/atoll', '@preact-mvc/atoll-island'],
+    exclude: ['@solid-mvc/core', '@solid-mvc/atoll', '@solid-mvc/atoll-island'],
   },
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['src/test-setup.ts'],
-    // @preact-mvc/* ship .ts sources, so vitest inlines them while plain
-    // JS deps externalize natively — splitting preact (and its
-    // jsx-runtime) into two module realms. The view interceptor patches
-    // one shared options object, so the whole preact graph must stay in
-    // the vite realm during tests.
+    // @solid-mvc/* and @solidjs/testing-library import solid-js — if they
+    // externalize to node they resolve the SERVER build (the node export
+    // condition), a second dead realm where effects and cleanup never
+    // run. Inline them so everything shares the aliased client build.
     server: {
       deps: {
         inline: [
-          /@preact-mvc[/]/,
-          'preact',
-          'preact/jsx-runtime',
-          '@preact/signals',
-          '@testing-library/preact',
-          'preact-router',
+          /@solid-mvc[/]/,
+          '@solidjs/testing-library',
+          'solid-js',
         ],
       },
     },
@@ -104,9 +145,9 @@ save-exact=true
 
 export const T_README = `# %%NAME%%
 
-A [PreactMVC](https://github.com/jwhenry3/preact-mvc) application —
+A [SolidMVC](https://github.com/jwhenry3/solid-mvc) application —
 Angular-style modules, DI, and MVC on class-based JSX views rendered by
-Preact, with signal reactivity.
+Solid, with signal reactivity.
 
 \`\`\`bash
 pmvc serve      # dev server (vite)
@@ -117,7 +158,7 @@ pmvc g module admin     # scaffold a feature module
 \`\`\`
 `;
 
-export const T_MAIN = `import { bootstrap } from '@preact-mvc/core';
+export const T_MAIN = `import { bootstrap } from '@solid-mvc/core';
 import { AppModule } from './app/app.module';
 import './styles.css';
 
@@ -208,7 +249,7 @@ if (typeof globalThis.matchMedia !== 'function') {
 }
 `;
 
-export const T_APP_MODULE = `import { Module, RouterModule } from '@preact-mvc/core';
+export const T_APP_MODULE = `import { Module, RouterModule } from '@solid-mvc/core';
 import { AppShell } from './app.shell';
 import { routes } from './app.routes';
 import { APP_TITLE } from './core/tokens';
@@ -221,12 +262,13 @@ import { APP_TITLE } from './core/tokens';
 export class AppModule {}
 `;
 
-export const T_TOKENS = `import { InjectionToken } from '@preact-mvc/core';
+export const T_TOKENS = `import { InjectionToken } from '@solid-mvc/core';
 
 export const APP_TITLE = new InjectionToken<string>('app title');
 `;
 
-export const T_APP_SHELL = `import { Component, View, inject, RouterOutlet, Link, Router } from '@preact-mvc/core';
+export const T_APP_SHELL = `import { For } from 'solid-js';
+import { Component, View, inject, RouterOutlet, Link, Router } from '@solid-mvc/core';
 import { APP_TITLE } from './core/tokens';
 
 const NAV = [
@@ -240,20 +282,21 @@ export class AppShell extends View {
   private title = inject(APP_TITLE);
 
   render() {
-    const url = this.router.url.value;
     return (
       <div style="min-height:100vh;display:flex;flex-direction:column">
         <header style="display:flex;align-items:center;gap:1rem;padding:0 1.25rem;height:3.5rem;border-bottom:1px solid #e2e2e8">
           <strong>{this.title}</strong>
           <nav style="display:flex;gap:1rem">
-            {NAV.map((n) => (
-              <Link
-                to={n.to}
-                class={url.startsWith(n.match) ? 'nav-link active' : 'nav-link'}
-              >
-                {n.label}
-              </Link>
-            ))}
+            <For each={NAV}>
+              {(n) => (
+                <Link
+                  to={n.to}
+                  class={this.router.url.value.startsWith(n.match) ? 'nav-link active' : 'nav-link'}
+                >
+                  {n.label}
+                </Link>
+              )}
+            </For>
           </nav>
         </header>
         <main style="flex:1;padding:1.5rem">
@@ -265,8 +308,7 @@ export class AppShell extends View {
 }
 `;
 
-export const T_APP_ROUTES = `import { h } from 'preact';
-import type { Route } from '@preact-mvc/core';
+export const T_APP_ROUTES = `import type { Route } from '@solid-mvc/core';
 import { HelloView } from './hello/hello.view';
 import { CounterView } from './counter/counter.view';
 %%ISLANDS_IMPORT%%
@@ -274,11 +316,11 @@ export const routes: Route[] = [
   { path: '/', component: HelloView },
   { path: '/hello/:name', component: HelloView },
   { path: '/counter', component: CounterView },
-%%ISLANDS_ROUTE%%  { path: '*', component: () => h('p', null, 'Not found.') },
+%%ISLANDS_ROUTE%%  { path: '*', component: () => 'Not found.' },
 ];
 `;
 
-export const T_HELLO_VIEW = `import { Component, View, inject, computed, Router } from '@preact-mvc/core';
+export const T_HELLO_VIEW = `import { Component, View, inject, computed, Router } from '@solid-mvc/core';
 
 // Standalone view: declared by no module, mounts by route. Route params
 // arrive on the injected Router's params signal.
@@ -300,32 +342,36 @@ export class HelloView extends View {
 }
 `;
 
-export const T_HELLO_TEST = `import { h } from 'preact';
-import { render } from '@testing-library/preact';
+export const T_HELLO_TEST = `import { render } from '@solidjs/testing-library';
+import type { JSX } from 'solid-js';
 import { describe, expect, it } from 'vitest';
-import { Injector, InjectorContext, Router } from '@preact-mvc/core';
+import { Injector, InjectorContext, Router } from '@solid-mvc/core';
 import { routes } from '../app.routes';
 import { HelloView } from './hello.view';
 
 // Views mount inside an injector scope — stand in for bootstrap() with a
 // bare injector providing whatever the view injects (HelloView needs the
 // Router for its :name param).
-function mount(node: any, injector = new Injector()) {
-  return render(h(InjectorContext.Provider, { value: injector }, node));
+function mount(node: () => JSX.Element, injector = new Injector()) {
+  return render(() => (
+    <InjectorContext.Provider value={injector}>
+      {node()}
+    </InjectorContext.Provider>
+  ));
 }
 
 describe('HelloView', () => {
   it('renders a greeting', () => {
     const inj = new Injector();
     inj.provide({ provide: Router, useValue: new Router(routes) });
-    const { container } = mount(<HelloView />, inj);
+    const { container } = mount(() => <HelloView />, inj);
     expect(container.querySelector('h1')?.textContent).toContain('Hello');
   });
 });
 `;
 
-export const T_COUNTER_VIEW = `import { Component, View, signal, computed } from '@preact-mvc/core';
-import type { OnInit } from '@preact-mvc/core';
+export const T_COUNTER_VIEW = `import { Component, View, signal, computed } from '@solid-mvc/core';
+import type { OnInit } from '@solid-mvc/core';
 
 @Component()
 export class CounterView extends View implements OnInit {
@@ -352,7 +398,7 @@ export class CounterView extends View implements OnInit {
 }
 `;
 
-/* ── pmvc new --islands ────────────────────────────────────────────── */
+/* ── smvc new --islands ────────────────────────────────────────────── */
 
 export const T_ISLAND_CONTRACT = `/**
  * %%CLASS%% island contract — the one module BOTH sides import. It names
@@ -364,7 +410,7 @@ export const T_ISLAND_CONTRACT = `/**
  * instance globals. The URL literal inside new Worker(...) stays
  * bundler-detectable — do not hoist or compute it.
  */
-import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const %%CAMEL%%Contract = defineIslandContract({
   app: '%%KEBAB%%',
@@ -384,12 +430,12 @@ export const T_ISLAND_WORKER = `/**
  * island apps below; everything here runs inside the worker against the
  * proxy DOM, View classes and all.
  */
-import { Component, View, signal } from '@preact-mvc/core';
+import { Component, View, signal } from '@solid-mvc/core';
 import {
   defineViewPolyWorker,
   viewIslandApp,
   emit,
-} from '@preact-mvc/atoll-island/worker';
+} from '@solid-mvc/atoll-island/worker';
 import { %%CAMEL%%Contract } from '../islands/%%KEBAB%%.contract';
 
 @Component()
@@ -423,8 +469,8 @@ export const worker = defineViewPolyWorker({
 });
 `;
 
-export const T_ISLAND_DEMO_VIEW = `import { Component, View } from '@preact-mvc/core';
-import { islandComponent } from '@preact-mvc/atoll-island';
+export const T_ISLAND_DEMO_VIEW = `import { Component, View } from '@solid-mvc/core';
+import { islandComponent } from '@solid-mvc/atoll-island';
 import { %%CAMEL%%Contract } from '../../islands/%%KEBAB%%.contract';
 
 // The contract carries the worker factory — no worker plumbing here.
@@ -449,14 +495,14 @@ export class %%CLASS%%DemoView extends View {
 }
 `;
 
-/* ── pmvc generate ─────────────────────────────────────────────────── */
+/* ── smvc generate ─────────────────────────────────────────────────── */
 
-export const G_VIEW = `import { Component, View, signal } from '@preact-mvc/core';
-import type { OnInit, OnDestroy } from '@preact-mvc/core';
+export const G_VIEW = `import { Component, View, signal } from '@solid-mvc/core';
+import type { OnInit, OnDestroy } from '@solid-mvc/core';
 
 @Component()
 export class %%CLASS%%View extends View implements OnInit, OnDestroy {
-  // Signals drive rendering — reads inside render() are auto-tracked.
+  // Signals drive updates — reads inside JSX expressions are tracked.
   private loading = signal(true);
 
   onInit() {
@@ -476,28 +522,32 @@ export class %%CLASS%%View extends View implements OnInit, OnDestroy {
 }
 `;
 
-export const G_VIEW_TEST = `import { h } from 'preact';
-import { render } from '@testing-library/preact';
+export const G_VIEW_TEST = `import { render } from '@solidjs/testing-library';
+import type { JSX } from 'solid-js';
 import { describe, expect, it } from 'vitest';
-import { Injector, InjectorContext } from '@preact-mvc/core';
+import { Injector, InjectorContext } from '@solid-mvc/core';
 import { %%CLASS%%View } from './%%KEBAB%%.view';
 
 // Views mount inside an injector scope — a bare Injector stands in for
 // bootstrap(). provide() whatever the view injects.
-function mount(node: any, injector = new Injector()) {
-  return render(h(InjectorContext.Provider, { value: injector }, node));
+function mount(node: () => JSX.Element, injector = new Injector()) {
+  return render(() => (
+    <InjectorContext.Provider value={injector}>
+      {node()}
+    </InjectorContext.Provider>
+  ));
 }
 
 describe('%%CLASS%%View', () => {
   it('renders', () => {
-    const { container } = mount(<%%CLASS%%View />);
+    const { container } = mount(() => <%%CLASS%%View />);
     expect(container.querySelector('h1')?.textContent).toBe('%%TITLE%%');
   });
 });
 `;
 
-export const G_CONTROLLER = `import { Controller } from '@preact-mvc/core';
-import type { OnInit, OnDestroy } from '@preact-mvc/core';
+export const G_CONTROLLER = `import { Controller } from '@solid-mvc/core';
+import type { OnInit, OnDestroy } from '@solid-mvc/core';
 
 // Injectable view logic. Declare it on a view (@Component({ controllers }))
 // or module (@Module({ controllers })) to share one instance down that
@@ -510,7 +560,7 @@ export class %%CLASS%%Controller implements OnInit, OnDestroy {
 }
 `;
 
-export const G_SERVICE = `import { Injectable, inject, DestroyRef } from '@preact-mvc/core';
+export const G_SERVICE = `import { Injectable, inject, DestroyRef } from '@solid-mvc/core';
 
 // Root-provided by default via @Injectable. inject() and scope-bound
 // effects work in field initializers and the constructor.
@@ -520,7 +570,7 @@ export class %%CLASS%%Service {
 }
 `;
 
-export const G_MODULE = `import { Module } from '@preact-mvc/core';
+export const G_MODULE = `import { Module } from '@solid-mvc/core';
 
 // Declare views under \`components\` so ownership is enforced, and view
 // logic under \`controllers\` to share one instance across this scope.

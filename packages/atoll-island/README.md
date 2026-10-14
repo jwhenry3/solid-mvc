@@ -1,29 +1,29 @@
-# @preact-mvc/atoll-island
+# @solid-mvc/atoll-island
 
-[![CI](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jwhenry3/preact-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/preact-mvc)
-[![Socket Badge](https://badge.socket.dev/npm/package/@preact-mvc/atoll-island)](https://badge.socket.dev/npm/package/@preact-mvc/atoll-island)
+[![CI](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jwhenry3/solid-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/solid-mvc)
+[![Socket Badge](https://badge.socket.dev/npm/package/@solid-mvc/atoll-island)](https://badge.socket.dev/npm/package/@solid-mvc/atoll-island)
 
-The PreactMVC adapter for `@preact-mvc/atoll` worker islands — the
+The SolidMVC adapter for `@solid-mvc/atoll` worker islands — the
 `*-island` half of the angular/react vs `*-island` pattern. On the shell,
 `islandComponent(contract)` turns a shared contract into a mountable
 component. In the worker, `viewIslandApp` + `defineViewPolyWorker` render
 `View` classes (or any component) against the proxy DOM, so island views
 get the same DI, modules, lifecycle, and signals as main-thread views.
 
-**[PreactMVC — island documentation](https://jwhenry3.github.io/preact-mvc/docs/island-apps/)**
+**[SolidMVC — island documentation](https://jwhenry3.github.io/solid-mvc/docs/island-apps/)**
 
 ## Install
 
 ```bash
-npm install @preact-mvc/atoll-island @preact-mvc/core @preact-mvc/atoll
+npm install @solid-mvc/atoll-island @solid-mvc/core @solid-mvc/atoll
 ```
 
 ## Contract → component → island
 
 ```ts
 // islands/ticker.contract.ts — imported by BOTH sides
-import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const tickerContract = defineIslandContract({
   app: 'ticker',
@@ -37,8 +37,8 @@ export const tickerContract = defineIslandContract({
 
 ```tsx
 // workers/ticker.worker.tsx — the worker entry
-import { Component, View, signal } from '@preact-mvc/core';
-import { defineViewPolyWorker, viewIslandApp } from '@preact-mvc/atoll-island/worker';
+import { Component, View, signal } from '@solid-mvc/core';
+import { defineViewPolyWorker, viewIslandApp } from '@solid-mvc/atoll-island/worker';
 import { tickerContract } from '../islands/ticker.contract';
 
 @Component()
@@ -53,7 +53,7 @@ export const worker = defineViewPolyWorker({
 
 ```tsx
 // views/demo.view.tsx — the shell mount
-import { islandComponent } from '@preact-mvc/atoll-island';
+import { islandComponent } from '@solid-mvc/atoll-island';
 import { tickerContract } from '../islands/ticker.contract';
 
 const TickerIsland = islandComponent(tickerContract);
@@ -68,7 +68,7 @@ const TickerIsland = islandComponent(tickerContract);
 - `lazyIsland(loader)` — code-split a contract's mount.
 - `viewIsland(App)` — mount a single component as a one-off island.
 
-## Worker surface (`@preact-mvc/atoll-island/worker`)
+## Worker surface (`@solid-mvc/atoll-island/worker`)
 
 - `viewIslandApp(Component, { contract })` — the worker renderer: views
   render against the proxy DOM, every mutation serializing to ops.

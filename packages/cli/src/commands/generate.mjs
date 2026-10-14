@@ -74,7 +74,7 @@ const SCHEMATICS = {
     log(`
 Mount it from any view:
 
-  import { islandComponent } from '@preact-mvc/atoll-island';
+  import { islandComponent } from '@solid-mvc/atoll-island';
   import { ${tk.CAMEL}Contract } from '../../islands/${name}.contract';
 
   const ${tk.CLASS}Island = islandComponent(${tk.CAMEL}Contract);
@@ -87,7 +87,7 @@ export function cmdGenerate(a) {
   const rawName = a._[1];
   if (!schematic || !rawName) {
     fail(
-      'usage: pmvc generate <view|controller|service|module|island> <name>\n' +
+      'usage: smvc generate <view|controller|service|module|island> <name>\n' +
         `       schematics: ${Object.keys(SCHEMATICS).join(', ')}`,
     );
   }
@@ -97,14 +97,14 @@ export function cmdGenerate(a) {
   }
 
   const found = findProjectRoot();
-  if (!found) fail('not inside a PreactMVC project (no @preact-mvc/core dependency found)');
+  if (!found) fail('not inside a SolidMVC project (no @solid-mvc/core dependency found)');
   const name = featureName(rawName);
 
   if (schematic === 'island') {
     const deps = { ...found.pkg.dependencies, ...found.pkg.devDependencies };
-    if (!deps['@preact-mvc/atoll-island']) {
+    if (!deps['@solid-mvc/atoll-island']) {
       warn(
-        '@preact-mvc/atoll-island is not a dependency — run `pmvc add islands` first.',
+        '@solid-mvc/atoll-island is not a dependency — run `pmvc add islands` first.',
       );
     }
   }

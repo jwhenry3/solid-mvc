@@ -13,7 +13,7 @@ export function Modules() {
 
       <CodeBlock
         file="todo.module.ts"
-        code={`import { Module } from '@preact-mvc/core';
+        code={`import { Module } from '@solid-mvc/core';
 import { SharedModule } from '../shared/shared.module';
 import { TodoStore } from './todo.store';
 import { TodoController } from './todo.controller';

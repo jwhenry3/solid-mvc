@@ -13,12 +13,12 @@ export function Quickstart() {
       <h2>1 · Install</h2>
       <CodeBlock
         language="bash"
-        code={`npm install @preact-mvc/core preact @preact/signals
-npm install -D @preact/preset-vite typescript vite`}
+        code={`npm install @solid-mvc/core solid-js
+npm install -D vite-plugin-solid @babel/plugin-proposal-decorators @babel/plugin-transform-class-properties typescript vite`}
       />
       <p>
-        Decorators need two tsconfig flags; JSX compiles to Preact's
-        automatic runtime:
+        Decorators need two tsconfig flags; JSX stays{' '}
+        <code>preserve</code> so vite-plugin-solid compiles it:
       </p>
       <CodeBlock
         file="tsconfig.json"
@@ -27,10 +27,35 @@ npm install -D @preact/preset-vite typescript vite`}
   "compilerOptions": {
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js"
   }
 }`}
+      />
+      <p>
+        And vite-plugin-solid compiles JSX with{' '}
+        <code>@solid-mvc/core/web</code> as the JSX runtime module — its{' '}
+        <code>createComponent</code> is what turns View classes into host
+        components:
+      </p>
+      <CodeBlock
+        file="vite.config.ts"
+        code={`import solidPlugin from 'vite-plugin-solid';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    solidPlugin({
+      solid: { moduleName: '@solid-mvc/core/web' },
+      babel: {
+        plugins: [
+          ['@babel/plugin-proposal-decorators', { legacy: true }],
+          ['@babel/plugin-transform-class-properties', { loose: true }],
+        ],
+      },
+    }),
+  ],
+});`}
       />
       <blockquote>
         <p>
@@ -44,7 +69,7 @@ npm install -D @preact/preset-vite typescript vite`}
       <h2>2 · A store</h2>
       <CodeBlock
         file="todo.store.ts"
-        code={`import { Injectable, signal, computed } from '@preact-mvc/core';
+        code={`import { Injectable, signal, computed } from '@solid-mvc/core';
 
 export interface Todo { id: number; text: string; done: boolean }
 
@@ -65,7 +90,7 @@ export class TodoStore {
       <h2>3 · A controller</h2>
       <CodeBlock
         file="todo.controller.ts"
-        code={`import { Controller, inject, signal } from '@preact-mvc/core';
+        code={`import { Controller, inject, signal } from '@solid-mvc/core';
 import { TodoStore } from './todo.store';
 
 @Controller()
@@ -85,7 +110,8 @@ export class TodoController {
       <CodeBlock
         file="todo.view.tsx"
         language="tsx"
-        code={`import { Component, View, inject } from '@preact-mvc/core';
+        code={`import { For } from 'solid-js';
+import { Component, View, inject } from '@solid-mvc/core';
 import { TodoController } from './todo.controller';
 import { TodoStore } from './todo.store';
 
@@ -104,9 +130,7 @@ export class TodoView extends View {
         />
         <button onClick={() => this.c.submit()}>add</button>
         <ul>
-          {this.store.todos.value.map((t) => (
-            <li key={t.id}>{t.text}</li>
-          ))}
+          <For each={this.store.todos.value}>{(t) => <li>{t.text}</li>}</For>
         </ul>
       </section>
     );
@@ -117,7 +141,7 @@ export class TodoView extends View {
       <h2>5 · The module declares it all</h2>
       <CodeBlock
         file="todo.module.ts"
-        code={`import { Module } from '@preact-mvc/core';
+        code={`import { Module } from '@solid-mvc/core';
 import { TodoStore } from './todo.store';
 import { TodoView } from './todo.view';
 
@@ -133,7 +157,7 @@ export class TodoModule {}`}
       <CodeBlock
         file="main.tsx"
         language="tsx"
-        code={`import { bootstrap } from '@preact-mvc/core';
+        code={`import { bootstrap } from '@solid-mvc/core';
 import { TodoModule } from './todo.module';
 
 bootstrap(TodoModule, document.getElementById('app')!);`}
@@ -143,14 +167,16 @@ bootstrap(TodoModule, document.getElementById('app')!);`}
       <ul>
         <li>
           <code>bootstrap</code> created the app injector from{' '}
-          <code>TodoModule</code>, mounted its bootstrap view inside it, and
-          installed the JSX interop that turns View classes into host
-          components.
+          <code>TodoModule</code> and mounted its bootstrap view inside it.
+          JSX compiled against <code>@solid-mvc/core/web</code> routes View
+          classes through <code>createComponent</code> into host components —
+          Solid never constructs them directly.
         </li>
         <li>
           The view's injector resolved <code>TodoStore</code> (declared on the
           module) and the declared <code>TodoController</code> — once, at
-          mount. <code>render()</code> is plain code; signals re-render it.
+          mount. <code>render()</code> runs once; signal reads inside JSX
+          expressions are what Solid tracks.
         </li>
       </ul>
       <p>

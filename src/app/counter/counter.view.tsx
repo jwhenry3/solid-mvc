@@ -1,5 +1,5 @@
-import { Component, View, inject, signal, computed } from '@preact-mvc/core';
-import type { OnInit } from '@preact-mvc/core';
+import { Component, View, inject, signal, computed } from '@solid-mvc/core';
+import type { OnInit } from '@solid-mvc/core';
 import { SessionService } from '../core/session.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/ui/button';

@@ -1,4 +1,4 @@
-import { Component, View, inject, computed, Router } from '@preact-mvc/core';
+import { Component, View, inject, computed, Router } from '@solid-mvc/core';
 import { SharedModule } from '../shared/shared.module';
 import { ThemeService } from '../shared/theme.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';

@@ -1,7 +1,7 @@
 // CI/publish install — installs every toolchain the suites touch. The
 // examples are NOT npm workspaces: each has its own lockfile and needs its
 // own `npm ci` (enterprise's vite/tailwind toolchain lives in its own
-// node_modules; its @preact-mvc/* imports resolve upward to the root
+// node_modules; its @solid-mvc/* imports resolve upward to the root
 // workspace links).
 //
 // Adding an example? Add it to `projects` — ci.yml and publish.yml both

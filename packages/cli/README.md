@@ -1,18 +1,18 @@
-# @preact-mvc/cli
+# @solid-mvc/cli
 
-[![CI](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jwhenry3/preact-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/preact-mvc)
-[![Socket Badge](https://badge.socket.dev/npm/package/@preact-mvc/cli)](https://badge.socket.dev/npm/package/@preact-mvc/cli)
+[![CI](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jwhenry3/solid-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/solid-mvc)
+[![Socket Badge](https://badge.socket.dev/npm/package/@solid-mvc/cli)](https://badge.socket.dev/npm/package/@solid-mvc/cli)
 
-The `pmvc` binary — scaffolding, generators, dev/build/test delegation,
-and dependency maintenance for PreactMVC projects.
+The `smvc` binary — scaffolding, generators, dev/build/test delegation,
+and dependency maintenance for SolidMVC projects.
 
-**[PreactMVC — CLI documentation](https://jwhenry3.github.io/preact-mvc/docs/cli/)**
+**[SolidMVC — CLI documentation](https://jwhenry3.github.io/solid-mvc/docs/cli/)**
 
 ## Install
 
 ```bash
-npm install -g @preact-mvc/cli
+npm install -g @solid-mvc/cli
 ```
 
 ## Create an app
@@ -21,10 +21,10 @@ npm install -g @preact-mvc/cli
 pmvc new my-app            # scaffold + npm install
 pmvc new my-app --islands  # + worker-island demo (contract + worker + route)
 pmvc new my-app --tailwind # + Tailwind v4 wiring
-cd my-app && pmvc serve    # vite dev server
+cd my-app && smvc serve    # vite dev server
 ```
 
-The generated app is a runnable `@Module`-/`@Component`-structured Preact
+The generated app is a runnable `@Module`-/`@Component`-structured Solid
 project with router, DI tokens, a sample view test, and (with `--islands`)
 a shared island contract + worker entry.
 
@@ -48,7 +48,7 @@ vite args pass through (`--watch`, `--no-typecheck`).
 
 - `pmvc add tailwind | islands` — install + wire an integration into an
   existing project.
-- `pmvc update` — bump `@preact-mvc/*` deps (`--to <ver>`,
+- `pmvc update` — bump `@solid-mvc/*` deps (`--to <ver>`,
   `--include-atoll` for `@atolljs/*`).
 
 The package is plain `.mjs` — no build step, ships `src/` directly.

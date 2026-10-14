@@ -19,8 +19,9 @@ export function GuideStyling() {
       />
       <CodeBlock
         file="vite.config.ts"
-        code={`import tailwindcss from '@tailwindcss/vite';
-export default defineConfig({ plugins: [preact(), tailwindcss()] });`}
+        code={`import solidPlugin from 'vite-plugin-solid';
+import tailwindcss from '@tailwindcss/vite';
+export default defineConfig({ plugins: [solidPlugin(), tailwindcss()] });`}
       />
       <CodeBlock
         file="src/styles.css"
@@ -93,7 +94,7 @@ export function Button({ class: c, variant, size, ...props }:
         The <code>JSX.IntrinsicElements['button']</code> trick types the
         component as "a button plus extras" — every real DOM prop passes
         through, which is what makes a primitives layer feel native. Add{' '}
-        <code>children?: ComponentChildren</code> to the intersection (it's
+        <code>children?: JSX.Element</code> to the intersection (it's
         not part of the intrinsic type).
       </p>
 

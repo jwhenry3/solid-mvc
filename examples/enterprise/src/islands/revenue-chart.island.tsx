@@ -10,19 +10,22 @@
  * worker. The worker heap is echarts + the islands runtime and nothing
  * else.
  *
- * Geometry: the island's mount element IS the chart box, so the pushed
- * container size is honest — doc.body reports it and doc.onResize fires
- * on every push (mount runs before the first push, so init reads 0 and
- * the first setSize task calls chart.resize()).
+ * Geometry: echarts.init reads clientWidth/getComputedStyle SYNCHRONOUSLY,
+ * and on the proxy DOM those are 0/empty until the driver pushes real
+ * geometry — initing at mount is what logs '[proxyDom] clientWidth has no
+ * synchronous answer' and ECharts' 'Can't get DOM width or height'. So
+ * bind() defers init to the first observeSize rect and keeps the size
+ * live via doc.onResize for layout changes after mount.
  */
-import { Component, Controller, View, inject, type OnDestroy } from '@preact-mvc/core';
+import { createEffect } from 'solid-js';
+import { Component, Controller, View, inject, type OnDestroy } from '@solid-mvc/core';
 import * as echarts from 'echarts/core';
 import { LineChart } from 'echarts/charts';
 import { AxisPointerComponent, GridComponent, TooltipComponent } from 'echarts/components';
 import { SVGRenderer } from 'echarts/renderers';
 import zrenv from 'zrender/lib/core/env';
-import { installDomShim } from '@preact-mvc/atoll-island/worker';
-import type { ProxyElement, ProxyDocument } from '@preact-mvc/atoll-island/worker';
+import { installDomShim } from '@solid-mvc/atoll-island/worker';
+import type { ProxyElement, ProxyDocument } from '@solid-mvc/atoll-island/worker';
 
 // Modular echarts: the worker only ever draws a line chart on SVG. The
 // full `import * as echarts from 'echarts'` drags every chart type,
@@ -55,7 +58,7 @@ export class RevenueChartController implements OnDestroy {
   private chart?: echarts.ECharts;
   private dark = false;
 
-  /** Preact ref target — typed as a real element, a ProxyElement at runtime. */
+  /** Solid ref target — typed as a real element, a ProxyElement at runtime. */
   bind = (el: HTMLDivElement | null): void => {
     if (!el || this.el === (el as unknown as ProxyElement)) return;
     const pel = el as unknown as ProxyElement;
@@ -69,7 +72,13 @@ export class RevenueChartController implements OnDestroy {
     // The chart div fills the island container's box — mark it so
     // clientWidth/offsetWidth/getBoundingClientRect report the pushed size.
     doc.markContainer(pel);
-    this.init();
+    // Defer echarts.init until the driver pushes a real rect — reads are
+    // 0/empty before the first setRects task (see the file-header note).
+    const unobserve = doc.observeSize(pel, (rect) => {
+      if (rect.w === 0 || rect.h === 0) return;
+      unobserve();
+      this.init();
+    });
     doc.onResize(() => this.chart?.resize());
   };
 
@@ -170,10 +179,13 @@ export class RevenueChartIsland extends View<{ dark?: boolean; data?: number[] }
 
   render() {
     const c = this.c;
-    // The props arrive via updateProps — each prop change re-renders in
-    // instance scope, and sync() only touches echarts when data/theme
-    // actually moved (reference-guarded).
-    c.sync(this.props.data, this.props.dark === true);
+    // The props arrive via updateProps — the adapter writes each key to a
+    // per-prop signal, so this effect re-syncs in instance scope on every
+    // push; sync() only touches echarts when data/theme actually moved
+    // (reference-guarded).
+    createEffect(() => {
+      c.sync(this.props.data, this.props.dark === true);
+    });
     return (
       <div
         ref={c.bind}

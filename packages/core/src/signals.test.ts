@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { signal, computed, batch, untracked } from '@preact/signals';
-import { effect } from './signals';
+import { signal, computed, batch, untracked, effect } from './signals';
 import { Injector } from './injector';
 
 describe('signals primitives', () => {

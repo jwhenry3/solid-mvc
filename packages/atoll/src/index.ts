@@ -1,5 +1,5 @@
 /**
- * `@preact-mvc/atoll` — the shell-facing facade over the real Atoll
+ * `@solid-mvc/atoll` — the shell-facing facade over the real Atoll
  * packages (`@atolljs/islands` + `@atolljs/core`). Worker islands render
  * inside Web Workers against a proxy DOM; commits stream back as ops the
  * driver replays onto real DOM.
@@ -8,8 +8,8 @@
  * `callbackProp`, `islandApp`. Worker side (import in worker entries):
  * the `./worker` subpath re-exports `@atolljs/islands/worker` —
  * `definePolyWorker`/`defineMonoWorker`, `emit`, instance scope. The
- * PreactMVC adapter and `<Island/>` shell components live in
- * `@preact-mvc/atoll-island`.
+ * SolidMVC adapter and `<Island/>` shell components live in
+ * `@solid-mvc/atoll-island`.
  */
 export { islandApp, islandAppNameOf } from '@atolljs/islands';
 export type { IslandAppProps } from '@atolljs/islands';

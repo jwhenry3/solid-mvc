@@ -21,7 +21,7 @@ export function IslandApps() {
         <CodeBlock
           file="dashboard.worker.tsx"
           language="tsx"
-          code={`import { defineViewPolyWorker } from '@preact-mvc/atoll-island/worker';
+          code={`import { defineViewPolyWorker } from '@solid-mvc/atoll-island/worker';
 import { TickerIsland } from './ticker';
 import { MetricsIsland } from './metrics';
 
@@ -33,7 +33,7 @@ export const worker = defineViewPolyWorker({
         <CodeBlock
           file="solo.worker.tsx"
           language="tsx"
-          code={`import { defineViewMonoWorker } from '@preact-mvc/atoll-island/worker';
+          code={`import { defineViewMonoWorker } from '@solid-mvc/atoll-island/worker';
 import { EditorIsland } from './editor';
 
 export const worker = defineViewMonoWorker(EditorIsland);`}
@@ -50,8 +50,9 @@ export const worker = defineViewMonoWorker(EditorIsland);`}
 
         <h2>Everything inside works the same</h2>
         <p>
-          The worker renderer installs the same vnode interop and render
-          scope, so the framework is unchanged in the worker:{' '}
+          The worker compiles JSX for Solid's universal renderer against{' '}
+          <code>@solid-mvc/atoll-island/worker</code>, so the framework is
+          unchanged in the worker:{' '}
           <code>@Component</code>/<code>View</code> construction,{' '}
           <code>inject()</code> into the island's own root injector, signals,
           and lifecycle all behave exactly as on the main thread.
@@ -65,8 +66,9 @@ export class MetricsIsland extends View<{ source?: string }> {
   private timer?: ReturnType<typeof setInterval>;
 
   onInit() {
-    // Timers/signals outside an event task still re-render: each write
-    // ships an op batch to the shell (an "unsolicited" push).
+    // Timers/signals outside an event task still update: each tracked
+    // write re-syncs the DOM and ships an op batch to the shell
+    // (an "unsolicited" push).
     this.timer = setInterval(() =>
       this.points.value = [...this.points.value.slice(-59), sample()], 1000);
   }
@@ -105,7 +107,7 @@ export class MetricsIsland extends View<{ source?: string }> {
         <CodeBlock
           file="ticker.contract.ts"
           language="ts"
-          code={`import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+          code={`import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const tickerContract = defineIslandContract({
   app: 'ticker',

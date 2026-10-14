@@ -1,6 +1,7 @@
-import { Component, View, signal } from '@preact-mvc/core';
-import { Island, connectIslandWorker, islandComponent, type IslandClient } from '@preact-mvc/atoll-island';
-import type { WorkerLike } from '@preact-mvc/atoll-island';
+import { For } from 'solid-js';
+import { Component, View, signal } from '@solid-mvc/core';
+import { Island, connectIslandWorker, islandComponent, type IslandClient } from '@solid-mvc/atoll-island';
+import type { WorkerLike } from '@solid-mvc/atoll-island';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
 import { Button } from '@/ui/button';
 
@@ -65,14 +66,15 @@ export class IslandDemoView extends View {
                 onEvent={(n, p) => this.log(n, p)}
               />
               <Island client={this.getShared()} app="clock" />
-              {Array.from({ length: this.spawnCount.value }, (_, i) => (
-                <Counter
-                  key={`spawn-${i}`}
-                  client={this.getShared()}
-                  props={{ start: 100 * (i + 1), label: `Spawned #${i + 1}` }}
-                  onEvent={(n, p) => this.log(n, p)}
-                />
-              ))}
+              <For each={Array.from({ length: this.spawnCount.value }, (_, i) => i)}>
+                {(i) => (
+                  <Counter
+                    client={this.getShared()}
+                    props={{ start: 100 * (i + 1), label: `Spawned #${i + 1}` }}
+                    onEvent={(n, p) => this.log(n, p)}
+                  />
+                )}
+              </For>
             </div>
             <Button variant="outline" onClick={this.spawnAnother}>
               Add island to shared worker
@@ -85,9 +87,7 @@ export class IslandDemoView extends View {
           </CardHeader>
           <CardContent>
             <ul class="space-y-1 font-mono text-xs text-muted-foreground">
-              {this.events.value.map((e, i) => (
-                <li key={i}>{e}</li>
-              ))}
+              <For each={this.events.value}>{(e) => <li>{e}</li>}</For>
             </ul>
           </CardContent>
         </Card>

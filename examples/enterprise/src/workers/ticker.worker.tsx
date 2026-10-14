@@ -4,9 +4,9 @@
  * island apps below; everything here runs inside the worker against the
  * proxy DOM, View classes and all.
  */
-import { Component, View, signal } from '@preact-mvc/core';
-import { defineViewPolyWorker, viewIsland, viewIslandApp } from '@preact-mvc/atoll-island/worker';
-import { emit } from '@preact-mvc/atoll-island/worker';
+import { Component, View, signal } from '@solid-mvc/core';
+import { defineViewPolyWorker, viewIsland, viewIslandApp } from '@solid-mvc/atoll-island/worker';
+import { emit } from '@solid-mvc/atoll-island/worker';
 import { tickerContract } from '../islands/ticker.contract';
 
 @Component()

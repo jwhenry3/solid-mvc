@@ -9,7 +9,7 @@ import {
   defineViewPolyWorker,
   viewIslandApp,
   ProxyElement,
-} from '@preact-mvc/atoll-island/worker';
+} from '@solid-mvc/atoll-island/worker';
 import { RevenueChartIsland } from '@/islands/revenue-chart.island';
 
 // zrender probes `canvas.getContext('2d')` for text measurement. A proxy

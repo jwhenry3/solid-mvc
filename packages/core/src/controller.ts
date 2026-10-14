@@ -1,30 +1,26 @@
-import { useLayoutEffect, useRef } from 'preact/hooks';
-import { useInjector } from './context';
+import { onCleanup } from 'solid-js';
 import { Injector } from './injector';
-import type { Type } from './injector';
+import { useInjector } from './context';
 
+// Lifecycle contracts — implement on a view, controller, or service and the
+// owning injector fires them on scope activate/deactivate.
 export interface OnInit {
   onInit(): void;
 }
+
 export interface OnDestroy {
   onDestroy(): void;
 }
 
-// Binds a controller class to a view instance. The controller is created once
-// per mounted view inside its own child injector, so `inject()` in its
-// constructor sees every provider from the enclosing module scope upward.
-// Lifecycle maps to mount/unmount: onInit on mount, onDestroy on unmount.
-export function useController<T extends object>(cls: Type<T>): T {
-  const parent = useInjector();
-  const ref = useRef<{ injector: Injector; ctrl: T } | null>(null);
-  if (!ref.current) {
-    const injector = new Injector(parent, `controller ${cls.name}`);
-    ref.current = { injector, ctrl: injector.instantiate(cls) };
-  }
-  const { ctrl, injector } = ref.current;
-  useLayoutEffect(() => {
-    injector.activate();
-    return () => injector.deactivate();
-  }, []);
-  return ctrl;
+/**
+ * useController — the explicit controller escape hatch for function
+ * components: always a fresh instance, owned by the calling component's
+ * mount (activate now, deactivate on cleanup).
+ */
+export function useController<C extends object>(cls: new () => C): C {
+  const inj = new Injector(useInjector(), `controller ${cls.name}`);
+  const inst = inj.instantiate(cls);
+  inj.activate();
+  onCleanup(() => inj.deactivate());
+  return inst;
 }

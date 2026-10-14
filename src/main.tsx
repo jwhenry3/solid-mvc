@@ -1,4 +1,4 @@
-import { bootstrap } from '@preact-mvc/core';
+import { bootstrap } from '@solid-mvc/core';
 import { AppModule } from './app/app.module';
 import './styles.css';
 

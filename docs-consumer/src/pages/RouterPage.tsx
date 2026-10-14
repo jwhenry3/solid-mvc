@@ -14,7 +14,7 @@ export function RouterPage() {
       <h2>Setup</h2>
       <CodeBlock
         file="app.routes.ts"
-        code={`import type { Route } from '@preact-mvc/core';
+        code={`import type { Route } from '@solid-mvc/core';
 import { TodoModule } from './todos/todo.module';
 import { HomeView } from './home.view';
 import { UserView } from './user.view';
@@ -138,16 +138,16 @@ export class SettingsShell extends View {
         children outrank <code>:param</code> siblings by config order.
       </p>
 
-      <h2>preact-router underneath</h2>
+      <h2>The router owns navigation</h2>
       <p>
-        The router rides <code>preact-router</code>: the outlet mounts a
-        bridge that claims every URL, so navigation is one operation no
-        matter who initiates it — <code>navigate()</code> goes through{' '}
-        <code>route()</code> and updates any embedded preact-router{' '}
-        <code>&lt;Router&gt;</code>, while foreign <code>route()</code>{' '}
-        calls and plain <code>&lt;a href="/…"&gt;</code> clicks drive our
-        router back through the bridge. If app code hosts its own
-        preact-router subtree, both sides stay in sync.
+        Under the hood the tree is <code>@solidjs/router</code> — the
+        framework service stays the surface: <code>navigate()</code>
+        delegates to its navigator and settles on the transition lane (url,
+        history, and outlet land asynchronously), <code>popstate</code>{' '}
+        restores back/forward, and a document-level interceptor claims
+        same-origin <code>&lt;a href="/…"&gt;</code> clicks so plain
+        anchors route without a <code>Link</code>. All listeners live on
+        the router's injector scope — destroying the scope detaches them.
       </p>
 
       <h2>Mounted apps: basePath</h2>

@@ -1,11 +1,8 @@
-import { h } from 'preact';
-import { render, screen, fireEvent, cleanup } from '@testing-library/preact';
-import { act } from 'preact/test-utils';
+import { render, screen, fireEvent, cleanup } from '@solidjs/testing-library';
 import { describe, it, expect, afterEach } from 'vitest';
 import { Injector } from '../injector';
 import { inject } from '../injector';
 import { InjectorContext } from '../context';
-import { route as prRoute } from 'preact-router';
 import { Router, ROUTES } from './router';
 import { RouterModule, routeComponent } from './module';
 import { RouterOutlet } from './outlet';
@@ -16,6 +13,10 @@ import { View } from '../view';
 import type { Route } from './router';
 
 afterEach(() => cleanup());
+
+// @solidjs/router settles navigations on its transition lane — url,
+// history, and outlet content land a tick after navigate()/clicks.
+const settle = () => new Promise((r) => setTimeout(r));
 
 const routes: Route[] = [
   { path: '/', component: () => <p>home</p> },
@@ -113,7 +114,11 @@ describe('nested routes', () => {
     history.pushState(null, '', '/users/42');
     const router = inj.get(Router);
     router.url.value = '/users/42';
-    render(h(InjectorContext.Provider, { value: inj }, h(RouterOutlet, {})));
+    render(() => (
+      <InjectorContext.Provider value={inj}>
+        <RouterOutlet />
+      </InjectorContext.Provider>
+    ));
     expect(await screen.findByText('user detail', { exact: false })).toBeTruthy();
     // The parent shell renders too — outlets nest, not replace.
     expect(screen.getByText(/users shell/)).toBeTruthy();
@@ -128,48 +133,56 @@ describe('navigation', () => {
     expect(location.pathname).toBe('/user/5');
   });
 
-  it('navigate() goes through preact-router when a bridge Router is mounted', async () => {
-    // With the outlet's bridge up, navigate() delegates to route() — the
-    // bridge's onChange feeds url back. Same URL, same signal; the path
-    // differs only in WHO pushes history.
+  it('navigate() updates the outlet content too', async () => {
     const M = RouterModule.forRoot(routes, { basePath: '/' });
     const root = new Injector();
     const inj = createModuleInjector(M, root);
     history.pushState(null, '', '/');
     const router = inj.get(Router);
     router.url.value = '/';
-    render(h(InjectorContext.Provider, { value: inj }, h(RouterOutlet, {})));
-    await act(async () => {
-      router.navigate('/user/7');
-    });
+    render(() => (
+      <InjectorContext.Provider value={inj}>
+        <RouterOutlet />
+      </InjectorContext.Provider>
+    ));
+    router.navigate('/user/7');
+    await settle();
     expect(router.url.value).toBe('/user/7');
     expect(location.pathname).toBe('/user/7');
     expect(await screen.findByText('user')).toBeTruthy();
   });
 
-  it('foreign route() calls drive our router via the bridge', async () => {
+  it('intercepts plain <a href> clicks anywhere in the document', async () => {
+    // The router owns the link-interception preact-router used to provide:
+    // unmodified same-origin anchors navigate in-app without a reload —
+    // including anchors the framework didn't render.
     const M = RouterModule.forRoot(routes, { basePath: '/' });
     const root = new Injector();
     const inj = createModuleInjector(M, root);
     history.pushState(null, '', '/');
     const router = inj.get(Router);
     router.url.value = '/';
-    render(h(InjectorContext.Provider, { value: inj }, h(RouterOutlet, {})));
-    // A route() call from outside our framework — preact-router Link, a
-    // third-party widget — resolves through the bridge into our signal.
-    await act(async () => {
-      prRoute('/user/11');
-    });
+    render(() => (
+      <InjectorContext.Provider value={inj}>
+        <a href="/user/11">foreign link</a>
+        <RouterOutlet />
+      </InjectorContext.Provider>
+    ));
+    // The Router tree (and its document-level interceptor) mounts a tick
+    // after the outlet — the DOM-side module loads via dynamic import so
+    // worker bundles never pull @solidjs/router's window-touching eval.
+    await settle();
+    fireEvent.click(screen.getByText('foreign link'));
+    await settle();
     expect(router.url.value).toBe('/user/11');
+    expect(location.pathname).toBe('/user/11');
     expect(await screen.findByText('user')).toBeTruthy();
   });
 
   it('syncs url on popstate', () => {
     const r = makeRouter();
     history.pushState(null, '', '/user/9');
-    act(() => {
-      window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    window.dispatchEvent(new PopStateEvent('popstate'));
     expect(r.url.value).toBe('/user/9');
   });
 });
@@ -185,7 +198,11 @@ describe('RouterOutlet', () => {
     return {
       inj,
       router,
-      ...render(h(InjectorContext.Provider, { value: inj }, h(RouterOutlet, {}))),
+      ...render(() => (
+        <InjectorContext.Provider value={inj}>
+          <RouterOutlet />
+        </InjectorContext.Provider>
+      )),
     };
   }
 
@@ -209,7 +226,12 @@ describe('RouterOutlet', () => {
     class FeatureMod {}
     const M = {
       __module: {
-        imports: [RouterModule.forRoot([{ path: '/f', module: FeatureMod }])],
+        imports: [
+          // Explicit base — @solidjs/router only matches URLs under the
+          // configured base, so an ambient baseURI left by earlier tests
+          // would shadow '/f'.
+          RouterModule.forRoot([{ path: '/f', module: FeatureMod }], { basePath: '/' }),
+        ],
       },
     };
     outletWith(M, '/f');
@@ -261,8 +283,8 @@ describe('base path', () => {
 
   it('restores a static-host deep link from the 404 shim param', () => {
     // The site's 404.html redirects /docs/<app>/<rest> to
-    // <app>/?__pmvc_path=<rest>; the Router consumes it on construction.
-    history.pushState(null, '', '/?__pmvc_path=user%2F5%3Fx%3D1');
+    // <app>/?__smvc_path=<rest>; the Router consumes it on construction.
+    history.pushState(null, '', '/?__smvc_path=user%2F5%3Fx%3D1');
     const r = new Router(routes, '/');
     expect(location.pathname).toBe('/user/5');
     expect(r.url.value).toBe('/user/5?x=1');
@@ -277,16 +299,16 @@ describe('Link', () => {
     const inj = createModuleInjector(M, root);
     const router = inj.get(Router);
     router.url.value = '/';
-    render(
-      h(
-        InjectorContext.Provider,
-        { value: inj },
-        h('div', {}, h(Link, { to: '/user/1' }, 'go'), h(RouterOutlet, {}))
-      )
-    );
-    await act(async () => {
-      fireEvent.click(screen.getByText('go'));
-    });
+    render(() => (
+      <InjectorContext.Provider value={inj}>
+        <div>
+          <Link to="/user/1">go</Link>
+          <RouterOutlet />
+        </div>
+      </InjectorContext.Provider>
+    ));
+    fireEvent.click(screen.getByText('go'));
+    await settle();
     expect(router.url.value).toBe('/user/1');
     expect(location.pathname).toBe('/user/1');
     expect(await screen.findByText('user')).toBeTruthy();

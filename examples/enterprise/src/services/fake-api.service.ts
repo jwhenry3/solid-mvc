@@ -4,7 +4,7 @@
  * are real — in an actual app this class wraps fetch/axios and nothing else
  * changes.
  */
-import { Injectable } from '@preact-mvc/core';
+import { Injectable } from '@solid-mvc/core';
 
 export interface User {
   id: number;

@@ -19,9 +19,9 @@ import {
   type QueryKey,
   type QueryObserverOptions,
   type QueryObserverResult,
-} from '@tanstack/preact-query';
-import { signal, type Signal } from '@preact/signals';
-import { effect, getCurrentInjector, DestroyRef } from '@preact-mvc/core';
+} from '@tanstack/query-core';
+import { signal, type Signal } from '@solid-mvc/core';
+import { effect, getCurrentInjector, DestroyRef } from '@solid-mvc/core';
 
 export function querySignal<TData = unknown, TError = Error>(
   client: QueryClient,

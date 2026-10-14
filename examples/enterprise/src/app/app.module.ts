@@ -1,4 +1,4 @@
-import { Module, RouterModule } from '@preact-mvc/core';
+import { Module, RouterModule } from '@solid-mvc/core';
 import { SessionService } from '@/services/session.service';
 import { ThemeService } from '@/services/theme.service';
 import { PageWorkerHost } from '@/services/page-worker.service';

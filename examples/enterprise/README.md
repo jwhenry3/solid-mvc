@@ -1,7 +1,7 @@
 # Enterprise example
 
 A self-contained Vite app showing how to build an enterprise-grade application
-on `@preact-mvc/core` + `@preact-mvc/atoll-island`: Tailwind CSS v4, a
+on `@solid-mvc/core` + `@solid-mvc/atoll-island`: Tailwind CSS v4, a
 shadcn-style component layer, TanStack Query, zod, ECharts, lucide icons, and a
 worker-rendered island, all wired through the framework's DI/module/view
 architecture rather than React-style hooks.
@@ -20,19 +20,19 @@ npm run typecheck
 | Styling | Tailwind v4 via `@tailwindcss/vite`, shadcn token theme (HSL CSS vars, light/dark) | `src/styles.css` |
 | UI primitives | shadcn-flavored components built on `cn()` (`clsx` + `tailwind-merge`) and CVA variants | `src/ui/` |
 | Theme | `ThemeService`: injectable signal-backed service, persisted, system-aware | `src/services/theme.service.ts` |
-| Server state | `@tanstack/preact-query` `QueryClient` provided through framework DI (`QueryModule`), consumed via a signal-backed `querySignal` helper | `src/lib/query.module.ts`, `src/lib/query.ts` |
+| Server state | `@tanstack/query-core` `QueryClient` provided through framework DI (`QueryModule`), consumed via a signal-backed `querySignal` helper | `src/lib/query.module.ts`, `src/lib/query.ts` |
 | Data layer | `FakeApi` injectable service simulating latency/entities | `src/services/fake-api.service.ts` |
 | Forms | Declared `@Controller` owns field signals; zod schema validates on submit | `src/pages/settings.view.tsx` |
 | Charts | ECharts SVG renderer running on a dedicated chart worker, replayed into the dashboard | `src/islands/revenue-chart.island.tsx`, `src/workers/chart.worker.tsx` |
 | Worker UI | Chart + ticker islands on dedicated workers (`islandComponent` + contracts); users/settings/components pages render inside per-page workers via `PageWorkerHost` + `WorkerPage` | `src/workers/`, `src/pages/worker-page.tsx` |
 | Routing | `RouterModule` + module-scoped route injectors | `src/app/routes.ts` |
-| Icons / dates | `lucide-preact`, `date-fns` | throughout |
+| Icons / dates | `lucide-solid`, `date-fns` | throughout |
 
 ## Architecture notes
 
 The app consumes the framework exactly like an external user would: everything
-imports from the published package names (`@preact-mvc/core`,
-`@preact-mvc/atoll-island`, `@preact-mvc/atoll-island/worker`), resolved here
+imports from the published package names (`@solid-mvc/core`,
+`@solid-mvc/atoll-island`, `@solid-mvc/atoll-island/worker`), resolved here
 through `file:` workspace deps.
 
 Key patterns to copy:

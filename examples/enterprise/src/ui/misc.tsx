@@ -1,7 +1,7 @@
-import type { ComponentChildren, JSX } from 'preact';
+import type { JSX } from 'solid-js';
 import { cn } from '@/lib/cn';
 
-export function Skeleton({ class: c, ...p }: JSX.IntrinsicElements['div'] & { children?: ComponentChildren }): ComponentChildren {
+export function Skeleton({ class: c, ...p }: JSX.IntrinsicElements['div'] & { children?: JSX.Element }): JSX.Element {
   return <div class={cn('animate-pulse rounded-md bg-muted', c)} {...p} />;
 }
 
@@ -9,7 +9,7 @@ export function Separator({
   class: c,
   orientation = 'horizontal',
   ...p
-}: JSX.IntrinsicElements['div'] & { children?: ComponentChildren } & { orientation?: 'horizontal' | 'vertical' }): ComponentChildren {
+}: JSX.IntrinsicElements['div'] & { children?: JSX.Element } & { orientation?: 'horizontal' | 'vertical' }): JSX.Element {
   return (
     <div
       role="separator"
@@ -28,7 +28,7 @@ export function Avatar({
   name,
   src,
   ...p
-}: JSX.IntrinsicElements['div'] & { children?: ComponentChildren } & { name: string; src?: string }): ComponentChildren {
+}: JSX.IntrinsicElements['div'] & { children?: JSX.Element } & { name: string; src?: string }): JSX.Element {
   const initials = name
     .split(' ')
     .map((w) => w[0])

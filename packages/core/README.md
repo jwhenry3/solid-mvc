@@ -1,43 +1,66 @@
-# @preact-mvc/core
+# @solid-mvc/core
 
-[![CI](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/preact-mvc/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/jwhenry3/preact-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/preact-mvc)
-[![Socket Badge](https://badge.socket.dev/npm/package/@preact-mvc/core)](https://badge.socket.dev/npm/package/@preact-mvc/core)
+[![CI](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jwhenry3/solid-mvc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jwhenry3/solid-mvc/graph/badge.svg?branch=main)](https://codecov.io/gh/jwhenry3/solid-mvc)
+[![Socket Badge](https://badge.socket.dev/npm/package/@solid-mvc/core)](https://badge.socket.dev/npm/package/@solid-mvc/core)
 
-Angular-inspired architecture rendered by Preact: `@Module`/`@Component`
+Angular-inspired architecture rendered by Solid: `@Module`/`@Component`
 decorators, hierarchical dependency injection, class-based `View`
 components, controllers, an injector-scoped router, and signal reactivity
-via `@preact/signals` — all over plain JSX, with no template compiler.
+over Solid's reactive graph — all over plain JSX, with no template
+compiler.
 
-**[PreactMVC — documentation](https://jwhenry3.github.io/preact-mvc/docs/overview/)**
+**[SolidMVC — documentation](https://jwhenry3.github.io/solid-mvc/docs/overview/)**
 
 ## Install
 
 ```bash
-npm install @preact-mvc/core preact @preact/signals
+npm install @solid-mvc/core solid-js
+npm install -D vite-plugin-solid @babel/plugin-proposal-decorators @babel/plugin-transform-class-properties
 ```
 
-Point JSX at Preact (`tsconfig.json`):
+Point JSX at Solid (`tsconfig.json`) and compile it through the
+framework's runtime module (`vite.config.ts`):
 
 ```jsonc
 {
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "preact",
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
     "experimentalDecorators": true,
     "useDefineForClassFields": false
   }
 }
 ```
 
+```ts
+import solidPlugin from 'vite-plugin-solid';
+
+export default defineConfig({
+  plugins: [
+    solidPlugin({
+      // @solid-mvc/core/web is the JSX runtime: its createComponent is
+      // what mounts View classes inside their injector scopes.
+      solid: { moduleName: '@solid-mvc/core/web' },
+      babel: {
+        plugins: [
+          ['@babel/plugin-proposal-decorators', { legacy: true }],
+          ['@babel/plugin-transform-class-properties', { loose: true }],
+        ],
+      },
+    }),
+  ],
+});
+```
+
 ## A view is a class
 
 `View` subclasses are constructed once per mount inside their own injector
 scope — `inject()` works in field initializers and constructors, `render()`
-stays hook-free, and signals drive re-rendering:
+runs once, and signal reads inside JSX expressions stay tracked:
 
 ```tsx
-import { Component, View, inject, signal, computed } from '@preact-mvc/core';
+import { Component, View, inject, signal, computed } from '@solid-mvc/core';
 
 @Component()
 export class CounterView extends View {
@@ -60,7 +83,7 @@ export class CounterView extends View {
 ## Modules are the app map
 
 ```ts
-import { Module, RouterModule } from '@preact-mvc/core';
+import { Module, RouterModule } from '@solid-mvc/core';
 import { AppShell } from './app.shell';
 import { routes } from './app.routes';
 
@@ -74,7 +97,7 @@ export class AppModule {}
 
 ```ts
 // main.tsx
-import { bootstrap } from '@preact-mvc/core';
+import { bootstrap } from '@solid-mvc/core';
 import { AppModule } from './app/app.module';
 
 bootstrap(AppModule, document.getElementById('app')!);

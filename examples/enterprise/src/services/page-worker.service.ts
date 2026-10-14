@@ -1,5 +1,5 @@
-import { Injectable, inject, DestroyRef } from '@preact-mvc/core';
-import { connectIslandWorker, type IslandClient } from '@preact-mvc/atoll-island';
+import { Injectable, inject, DestroyRef } from '@solid-mvc/core';
+import { connectIslandWorker, type IslandClient } from '@solid-mvc/atoll-island';
 
 /**
  * The worker host for worker-rendered routed pages (dashboard, users,

@@ -1,6 +1,6 @@
-import { Controller, inject, signal } from '@preact-mvc/core';
-import type { OnDestroy } from '@preact-mvc/core';
-import { QueryClient } from '@tanstack/preact-query';
+import { Controller, inject, signal } from '@solid-mvc/core';
+import type { OnDestroy } from '@solid-mvc/core';
+import { QueryClient } from '@tanstack/query-core';
 import { FakeApi } from '@/services/fake-api.service';
 import { querySignal } from '@/lib/query';
 

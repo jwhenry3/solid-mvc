@@ -6,7 +6,7 @@ export function Islands() {
     <article>
       <h1>Islands</h1>
       <p class="lead">
-        Worker-rendered UI islands: real PreactMVC view trees — View classes,
+        Worker-rendered UI islands: real SolidMVC view trees — View classes,
         signals, DI, lifecycle — running inside a Web Worker, streamed to the
         shell DOM over a serialized op protocol. The main thread stays free;
         the island looks and behaves like an ordinary element.
@@ -20,15 +20,15 @@ export function Islands() {
 │ <Island app="ticker"   │ ◀──────────  │ ProxyDocument — the     │
 │   worker={entry}/>     │   ops        │ only "DOM" a worker sees│
 │        │               │              │        │                │
-│   driver.ts — replays  │  events ───▶ │  Preact render of the   │
+│   driver.ts — replays  │  events ───▶ │   Solid render of the   │
 │   ops onto real DOM    │              │  island's view tree     │
 └────────────────────────┘              └─────────────────────────┘`}
       />
       <p>
         Two threads, two halves of the package:{' '}
-        <code>@preact-mvc/atoll-island</code> is the shell surface,{' '}
-        <code>@preact-mvc/atoll-island/worker</code> is the worker entry. The
-        engine underneath is the real Atoll — <code>@preact-mvc/atoll</code>{' '}
+        <code>@solid-mvc/atoll-island</code> is the shell surface,{' '}
+        <code>@solid-mvc/atoll-island/worker</code> is the worker entry. The
+        engine underneath is the real Atoll — <code>@solid-mvc/atoll</code>{' '}
         is a thin facade over <code>@atolljs/islands</code> +{' '}
         <code>@atolljs/core</code> (op protocol, proxy DOM, driver) — and the
         adapter is the piece that knows how to render View classes into it.
@@ -39,8 +39,8 @@ export function Islands() {
         file="ticker.worker.tsx"
         language="tsx"
         side="worker"
-        code={`import { Component, View, signal } from '@preact-mvc/core';
-import { defineViewPolyWorker, emit } from '@preact-mvc/atoll-island/worker';
+        code={`import { Component, View, signal } from '@solid-mvc/core';
+import { defineViewPolyWorker, emit } from '@solid-mvc/atoll-island/worker';
 
 @Component()
 export class TickerIsland extends View {
@@ -63,8 +63,8 @@ export const worker = defineViewPolyWorker({ apps: { ticker: TickerIsland } });`
         file="dashboard.view.tsx"
         language="tsx"
         side="shell"
-        code={`import { Island } from '@preact-mvc/atoll-island';
-import type { WorkerLike } from '@preact-mvc/atoll-island';
+        code={`import { Island } from '@solid-mvc/atoll-island';
+import type { WorkerLike } from '@solid-mvc/atoll-island';
 
 // Literal new URL — Vite must see it to emit the worker bundle.
 const tickerWorker = (): WorkerLike =>
@@ -80,8 +80,8 @@ const tickerWorker = (): WorkerLike =>
 />`}
       />
       <p>
-        The button ticks once a second <em>in the worker</em> — each signal
-        write re-renders there and ships an op batch; clicking it emits{' '}
+        The button ticks once a second <em>in the worker</em> — each tracked
+        signal write re-syncs its proxy DOM and ships an op batch; clicking it emits{' '}
         <code>ping</code> back to the shell's <code>onEvent</code>. The shell
         never coordinates any of it.
       </p>
@@ -96,7 +96,7 @@ const tickerWorker = (): WorkerLike =>
       <CodeBlock
         file="ticker.contract.ts"
         language="ts"
-        code={`import { defineIslandContract, z } from '@preact-mvc/atoll-island';
+        code={`import { defineIslandContract, z } from '@solid-mvc/atoll-island';
 
 export const tickerContract = defineIslandContract({
   app: 'ticker',
@@ -110,7 +110,7 @@ export const tickerContract = defineIslandContract({
       <CodeBlock
         language="tsx"
         side="shell"
-        code={`import { islandComponent } from '@preact-mvc/atoll-island';
+        code={`import { islandComponent } from '@solid-mvc/atoll-island';
 import { tickerContract } from './ticker.contract';
 
 const Ticker = islandComponent(tickerContract);

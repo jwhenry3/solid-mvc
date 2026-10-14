@@ -1,7 +1,8 @@
-import { h, render } from 'preact';
+import { createComponent } from 'solid-js';
+import { render } from 'solid-js/web';
 import { Injector } from './injector';
 import { InjectorContext } from './context';
-import { installViewInterop } from './view';
+import { viewComponent } from './view';
 import type { ModuleMeta } from './decorators';
 
 // Modules are the unit of provider scoping. A module's providers (plus those
@@ -60,8 +61,12 @@ export function getModuleInjector(mod: any, parent: Injector): Injector {
   return injector;
 }
 
-export function bootstrap(RootModule: any, el: HTMLElement): void {
-  installViewInterop();
+/**
+ * Mount the root module's bootstrap component into `el`. Returns Solid's
+ * dispose function — call it to unmount the app and run every scope's
+ * onDestroy/cleanups.
+ */
+export function bootstrap(RootModule: any, el: HTMLElement): () => void {
   const root = new Injector(null, 'root');
   const appInjector = createModuleInjector(RootModule, root);
   const meta = getModuleMeta(RootModule)!;
@@ -69,8 +74,14 @@ export function bootstrap(RootModule: any, el: HTMLElement): void {
   if (!App) {
     throw new Error('Root module must declare a bootstrap component: @Module({ bootstrap: [AppView] })');
   }
-  render(
-    h(InjectorContext.Provider, { value: appInjector }, h(App, {})),
-    el
+  return render(
+    () =>
+      createComponent(InjectorContext.Provider, {
+        value: appInjector,
+        get children() {
+          return createComponent(viewComponent(App), {});
+        },
+      }),
+    el,
   );
 }

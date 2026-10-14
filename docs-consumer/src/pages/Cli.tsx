@@ -6,7 +6,7 @@ export function Cli() {
     <article>
       <h1>CLI</h1>
       <p class="lead">
-        <code>@preact-mvc/cli</code> is the project toolkit — Angular CLI
+        <code>@solid-mvc/cli</code> is the project toolkit — Angular CLI
         shaped: scaffold apps, generate views/controllers/services/
         modules/islands, run the project's vite and vitest, add
         integrations, and bump framework deps.
@@ -15,12 +15,12 @@ export function Cli() {
       <h2>Install</h2>
       <CodeBlock
         language="bash"
-        code={`npm install -g @preact-mvc/cli
+        code={`npm install -g @solid-mvc/cli
 # or run without installing:
-npx @preact-mvc/cli <command>`}
+npx @solid-mvc/cli <command>`}
       />
       <p>
-        The binary is <code>pmvc</code> (with <code>PreactMVC</code> as a
+        The binary is <code>pmvc</code> (with <code>SolidMVC</code> as a
         longer alias). It is dependency-free Node — it must run before a
         project has <code>node_modules</code> at all.
       </p>
@@ -81,13 +81,13 @@ pmvc test --watch           # vitest watch mode`}
       <CodeBlock
         language="bash"
         code={`pmvc add tailwind   # deps + vite plugin + styles.css
-pmvc add islands    # @preact-mvc/atoll + atoll-island + @atolljs/core`}
+pmvc add islands    # @solid-mvc/atoll + atoll-island + @atolljs/core`}
       />
 
       <h2>Updates</h2>
       <CodeBlock
         language="bash"
-        code={`pmvc update                 # bump every @preact-mvc/* dep to latest, npm install
+        code={`pmvc update                 # bump every @solid-mvc/* dep to latest, npm install
 pmvc update --to 0.2.0      # pin to a specific release
 pmvc update -d              # show the planned changes only
 pmvc update --include-atoll # also bump @atolljs/* deps`}
@@ -102,8 +102,10 @@ pmvc update --include-atoll # also bump @atolljs/* deps`}
           Generated tests mount views through{' '}
           <code>InjectorContext.Provider</code> — a bare <code>render()</code>{' '}
           has no injector context, so <code>inject()</code> throws by design.
-          The generated vite config keeps the whole preact graph in one
-          vitest realm for the same reason.
+          The generated vite config aliases <code>solid-js</code> to its
+          client build so the whole graph resolves one runtime realm —
+          without it, the node condition picks the server build where
+          effects never run.
         </p>
       </blockquote>
     </article>

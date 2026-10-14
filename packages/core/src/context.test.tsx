@@ -1,6 +1,4 @@
-import { h } from 'preact';
-import { render, screen, cleanup } from '@testing-library/preact';
-import { act } from 'preact/test-utils';
+import { render, screen, cleanup } from '@solidjs/testing-library';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { Injector, InjectionToken, inject } from './injector';
 import { InjectorContext, useInjector, useService, Provide } from './context';
@@ -21,8 +19,12 @@ function scoped(providers: any[] = []) {
   return inj;
 }
 
-function mount(node: any, injector: Injector) {
-  return render(h(InjectorContext.Provider, { value: injector }, node));
+// Solid children evaluate eagerly at the JSX site — pass a THUNK so
+// component creation lands inside the Provider's context owner.
+function mount(node: () => any, injector: Injector) {
+  return render(() => (
+    <InjectorContext.Provider value={injector}>{node()}</InjectorContext.Provider>
+  ));
 }
 
 describe('useService', () => {
@@ -36,7 +38,7 @@ describe('useService', () => {
         </p>
       );
     }
-    mount(<F />, scoped([Svc, { provide: TOKEN, useValue: 'tok' }]));
+    mount(() => <F />, scoped([Svc, { provide: TOKEN, useValue: 'tok' }]));
     expect(screen.getByText('service message/tok')).toBeTruthy();
   });
 
@@ -46,7 +48,7 @@ describe('useService', () => {
       useService(Svc);
       return null;
     }
-    expect(() => render(<F />)).toThrow(/No injector in context/);
+    expect(() => render(() => <F />)).toThrow(/No injector in context/);
     errSpy.mockRestore();
   });
 });
@@ -64,7 +66,7 @@ describe('useController', () => {
       seen.push(c);
       return <p>{c.svc.msg}</p>;
     }
-    mount(<F />, scoped([Svc]));
+    mount(() => <F />, scoped([Svc]));
     expect(screen.getByText('service message')).toBeTruthy();
     expect(seen.length).toBeGreaterThan(0);
     expect(new Set(seen).size).toBe(1); // same instance across renders
@@ -82,8 +84,7 @@ describe('useController', () => {
       useController(Ctrl);
       return null;
     }
-    const r = mount(<F />, scoped([]));
-    await act(async () => {});
+    const r = mount(() => <F />, scoped([]));
     expect(onInit).toHaveBeenCalledTimes(1);
     r.unmount();
     expect(onDestroy).toHaveBeenCalledTimes(1);
@@ -96,7 +97,7 @@ describe('Provide', () => {
       const s = useService(Svc);
       return <p>{s.msg}</p>;
     }
-    mount(
+    mount(() => 
       <Provide providers={[Svc]}>
         <Reader />
       </Provide>,
@@ -114,7 +115,7 @@ describe('Provide', () => {
       const s = useService(Svc as any) as any;
       return <p>{s.msg}</p>;
     }
-    mount(
+    mount(() => 
       <Provide providers={[{ provide: Svc, useClass: OtherSvc }]}>
         <Reader />
       </Provide>,
@@ -132,7 +133,7 @@ describe('useInjector', () => {
       return null;
     }
     const inj = scoped([]);
-    mount(<F />, inj);
+    mount(() => <F />, inj);
     expect(got).toBe(inj);
   });
 });

@@ -5,25 +5,35 @@
  * shared with the island app stands in for worker-side state — in a real
  * worker the signal lives in the worker; in-process the realms share one
  * heap, which is exactly what makes poking it a faithful out-of-task test.
+ *
+ * The island views live in islands-test.worker.tsx so the universal-JSX
+ * plugin instance compiles them for the proxy-DOM renderer; this file is
+ * shell-side (DOM-compiled).
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { h, render } from 'preact';
-import { act } from '@testing-library/preact';
-import { fireEvent } from '@testing-library/dom';
-import { Component, View, signal, inject } from '@preact-mvc/core';
-import { Injectable } from '@preact-mvc/core';
+import { render } from 'solid-js/web';
+import { fireEvent } from '@solidjs/testing-library';
 import { InProcessWorker } from '@atolljs/core/testing/inProcessWorker';
-import { definePolyWorker, emit } from '@preact-mvc/atoll/worker';
-import { defineViewPolyWorker, defineViewMonoWorker, viewIsland, viewIslandApp } from './adapter';
+import { definePolyWorker } from '@solid-mvc/atoll/worker';
+import { defineViewPolyWorker, defineViewMonoWorker, viewIsland } from './adapter';
 import {
   callbackProp,
   connectIslandWorker,
   defineIslandContract,
   mountIsland,
   z,
-} from '@preact-mvc/atoll';
+} from '@solid-mvc/atoll';
 import { Island, islandComponent } from './shell';
-import type { IslandWorkerDef } from '@preact-mvc/atoll/worker';
+import type { IslandWorkerDef } from '@solid-mvc/atoll/worker';
+import {
+  CounterIsland,
+  TickerIsland,
+  GreetIsland,
+  LeaveIsland,
+  SvgIsland,
+  tick,
+  leaves,
+} from './islands-test.worker';
 
 // The real Atoll harness: stub the Worker global with InProcessWorker —
 // the pool's INIT/EXECUTE_TASK protocol runs in-process against the real
@@ -31,13 +41,9 @@ import type { IslandWorkerDef } from '@preact-mvc/atoll/worker';
 // call time (module-level union), so no handlerModules are needed.
 vi.stubGlobal('Worker', InProcessWorker);
 
-// keepAlive needs @atolljs/islands ≥0.1.12 (isKeepAliveClient). Gate the
-// warm-worker test on the installed copy actually carrying the flag so CI
-// on 0.1.11 skips instead of failing. The cast keeps the typecheck green
-// on versions without the export.
-const keepAliveSupported =
-  typeof (await import('@atolljs/islands') as Record<string, unknown>)['isKeepAliveClient'] ===
-  'function';
+// keepAlive needs @atolljs/islands ≥0.1.12 (isKeepAliveClient is internal,
+// not exported — the pinned dep provides it; on older versions the option
+// is silently dropped and this test fails loudly, which is what we want).
 
 // In-process the worker and shell share jsdom's globals — and the islands
 // worker's instance dispatcher shadows `document`/`window`/`Element`… so
@@ -62,12 +68,10 @@ const restoreShellGlobals = (): void => {
 };
 
 const workerEntry = (): Worker =>
-  new Worker(new URL('./islands-test.worker.ts', import.meta.url), { type: 'module' });
+  new Worker(new URL('./islands-test.worker.tsx', import.meta.url), { type: 'module' });
 
 const flush = async (): Promise<void> => {
-  await act(async () => {
-    await new Promise((r) => setTimeout(r, 0));
-  });
+  await new Promise((r) => setTimeout(r, 0));
 };
 
 const mountInto = (
@@ -80,70 +84,6 @@ const mountInto = (
   return mountIsland({ el, worker: workerEntry, ...opts });
 };
 
-// --- test island apps -----------------------------------------------------------
-
-@Component()
-class CounterIsland extends View<{ start?: number; label?: string }> {
-  count = signal(this.props.start ?? 0);
-  render() {
-    return (
-      <div class="card">
-        <h3>{this.props.label ?? 'counter'}</h3>
-        <button
-          class="inc"
-          onClick={() => {
-            this.count.value++;
-            if (this.count.value === 5) emit('five', { count: this.count.value });
-          }}
-        >
-          count {this.count.value}
-        </button>
-      </div>
-    );
-  }
-}
-
-// Module-level signal: in-process sharing lets the test poke worker-side state.
-const tick = signal(0);
-
-@Component()
-class TickerIsland extends View {
-  render() {
-    return <p class="tick">tick {tick.value}</p>;
-  }
-}
-
-// Multi-word DOM events arrive prop-sliced as PascalCase ('MouseLeave') —
-// the proxy boundary must map them to the real lowercase type
-// ('mouseleave'), not just decapitalize ('mouseLeave' never dispatches).
-const leaves = signal(0);
-
-@Component()
-class LeaveIsland extends View {
-  render() {
-    return (
-      <div class="leavebox" onMouseLeave={() => leaves.value++}>
-        hover me
-      </div>
-    );
-  }
-}
-
-@Injectable()
-class IslandGreeter {
-  hi(n: string) {
-    return `hello ${n}`;
-  }
-}
-
-@Component({ providers: [IslandGreeter] })
-class GreetIsland extends View<{ name?: string }> {
-  private g = inject(IslandGreeter);
-  render() {
-    return <p class="greet">{this.g.hi(this.props.name ?? '?')}</p>;
-  }
-}
-
 let def: IslandWorkerDef;
 beforeEach(() => {
   def = defineViewPolyWorker({
@@ -154,6 +94,7 @@ beforeEach(() => {
       ticker: TickerIsland,
       greet: GreetIsland,
       leave: LeaveIsland,
+      svg: SvgIsland,
       stamp: {
         imperative: (doc, props) => {
           const d = doc.createElement('div');
@@ -219,10 +160,18 @@ describe('islands', () => {
     tick.value = 7;
     // Message-only transport: the 50ms poll timer fires the worker's
     // flush() task, which drains the ops committed outside task calls.
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 120));
-    });
+    await new Promise((r) => setTimeout(r, 120));
     expect(document.querySelector('.tick')!.textContent).toBe('tick 7');
+    island.destroy();
+  });
+
+  it('svg elements replay in the SVG namespace', async () => {
+    const island = await mountInto(def, { app: 'svg' });
+    const svg = document.querySelector('svg')!;
+    expect(svg.namespaceURI).toBe('http://www.w3.org/2000/svg');
+    expect(svg.getAttribute('viewBox')).toBe('0 0 24 24');
+    expect(svg.querySelector('circle')!.namespaceURI).toBe('http://www.w3.org/2000/svg');
+    expect(svg.querySelector('path')!.namespaceURI).toBe('http://www.w3.org/2000/svg');
     island.destroy();
   });
 
@@ -297,7 +246,7 @@ describe('islands', () => {
     b.destroy();
   });
 
-  it.runIf(keepAliveSupported)(
+  it(
     'keepAlive: destroy unmounts the instance but leaves the worker resident for warm remount',
     async () => {
       const client = connectIslandWorker({ worker: workerEntry, keepAlive: true });
@@ -380,13 +329,11 @@ describe('islands', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const events: [string, unknown][] = [];
-    await act(async () => {
-      render(
-        <Counter start={8} onEvent={(n, p) => events.push([n, p])} />,
-        container,
-      );
-      await new Promise((r) => setTimeout(r, 0));
-    });
+    const dispose = render(
+      () => <Counter start={8} onEvent={(n: string, p: unknown) => events.push([n, p])} />,
+      container,
+    );
+    await flush();
     await flush();
     const btn = container.querySelector('.inc')! as HTMLButtonElement;
     expect(btn.textContent).toBe('count 8');
@@ -394,7 +341,7 @@ describe('islands', () => {
     fireEvent.click(btn);
     await flush();
     expect(btn.textContent).toBe('count 9');
-    render(null, container);
+    dispose();
     expect(events).toEqual([]);
   });
 
@@ -402,24 +349,24 @@ describe('islands', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const onEvent = () => {};
-    await act(async () => {
-      render(
+    const dispose = render(
+      () => (
         <Island
           worker={workerEntry}
           app="counter"
           props={{ start: 4 }}
           onEvent={onEvent}
-        />,
-        container,
-      );
-      await new Promise((r) => setTimeout(r, 0));
-    });
+        />
+      ),
+      container,
+    );
+    await flush();
     await flush();
     const btn = container.querySelector('.inc')! as HTMLButtonElement;
     expect(btn.textContent).toBe('count 4');
     fireEvent.click(btn);
     await flush();
     expect(container.querySelector('.inc')!.textContent).toBe('count 5');
-    render(null, container);
+    dispose();
   });
 });

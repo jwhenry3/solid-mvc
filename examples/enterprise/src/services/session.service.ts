@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@preact-mvc/core';
+import { Injectable, signal } from '@solid-mvc/core';
 
 /**
  * App-wide session state — the model layer for "who is signed in". Any

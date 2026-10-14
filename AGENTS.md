@@ -1,9 +1,9 @@
-# AGENTS.md — PreactMVC
+# AGENTS.md — SolidMVC
 
 A greenfield frontend framework: Angular-inspired modules/DI/decorators +
-MVC organization + class-based JSX views rendered by Preact + signal
-reactivity (`@preact-mvc/core`), plus Atoll-modeled worker islands
-(`@preact-mvc/atoll` core + the `@preact-mvc/atoll-island` adapter) that
+MVC organization + class-based JSX views rendered by Solid + signal
+reactivity (`@solid-mvc/core`), plus Atoll-modeled worker islands
+(`@solid-mvc/atoll` core + the `@solid-mvc/atoll-island` adapter) that
 render views inside Web Workers. Layout mirrors Atoll's
 `islands`/`react`/`react-island` split (docs/atoll/islands-frameworks.md).
 
@@ -34,7 +34,7 @@ the doc.
 ## Commands
 
 ```bash
-npm install              # deps (+ links the @preact-mvc/* workspaces)
+npm install              # deps (+ links the @solid-mvc/* workspaces)
 npm test                 # vitest — all suites (framework + app + islands)
 npm run test:watch
 npm run typecheck        # tsc --noEmit over src + packages
@@ -57,7 +57,7 @@ npm run publish -- <ver> # lockstep staged publish (see below)
 `.github/workflows/ci.yml` — checks (typechecks + build), test, audit.
 `.github/workflows/publish.yml` — on GitHub Release: test gate, then
 `scripts/publish.mjs <tag>` stamps all packages to the release version
-(repo files keep `0.0.0`), rewrites internal `@preact-mvc/*` ranges, and
+(repo files keep `0.0.0`), rewrites internal `@solid-mvc/*` ranges, and
 `npm stage publish`es in dep order (core → atoll → atoll-island → cli) with
 OIDC provenance. Repo exports stay `./src` for dev (workspace links
 resolve them); publish.mjs compiles `dist/` (tsc emit: `.js` + `.d.ts`)
@@ -70,18 +70,18 @@ release needs a one-time bootstrap: `npm run publish -- <ver> --direct`.
 ## Repo shape
 
 ```
-packages/core/        @preact-mvc/core — the framework: injector,
+packages/core/        @solid-mvc/core — the framework: injector,
                       decorators, modules, View classes, signals,
                       context, router
-packages/atoll/       @preact-mvc/atoll — facade over @atolljs/islands +
+packages/atoll/       @solid-mvc/atoll — facade over @atolljs/islands +
                       @atolljs/core (the op protocol, proxy DOM, worker
                       runtime, and driver are AtollJS code). `.` entry =
                       shell/mount API, `./worker` = worker defs
-packages/atoll-island/ @preact-mvc/atoll-island — the *-island adapter:
+packages/atoll-island/ @solid-mvc/atoll-island — the *-island adapter:
                       `.` entry = <Island/>/islandComponent/lazyIsland
                       shell surface, `./worker` = viewIslandApp/
                       defineViewPolyWorker renderer
-packages/cli/         @preact-mvc/cli — `pmvc` bin: new / generate /
+packages/cli/         @solid-mvc/cli — `smvc` bin: new / generate /
                       serve / build / test / add / update. Dependency-free
                       .mjs (ships runnable JS — a bin can't be .ts).
 src/app/              demo app — todos/counter/hello/standalone/islands
@@ -99,12 +99,15 @@ docs/                 second memory — see above
 ## Non-negotiable rules
 
 - **Views are classes, not hooks.** `View` subclasses are constructed once
-  inside their own injector scope by the vnode-interception host in
-  `packages/core/src/view.ts` — never let Preact instantiate them directly.
-  `inject()` belongs in field initializers/constructors; `render()` stays
-  hook-free.
+  inside their own injector scope by the `createComponent` seam in
+  `packages/core/src/view.ts` + `web.ts` — never let Solid instantiate
+  them directly. `inject()` belongs in field initializers/constructors;
+  `render()` runs once — signal reads must sit inside JSX expressions.
+  **One solid-js realm**: every vite config aliases `solid-js`/`solid-js/web`
+  to the client build (the node/worker export conditions pick the dead
+  server build), and vitest inlines Solid-importing deps.
 - **The worker thread is DOM-free.** Atoll's proxy DOM
-  (`@atolljs/islands/worker`, re-exported via `@preact-mvc/atoll/worker`)
+  (`@atolljs/islands/worker`, re-exported via `@solid-mvc/atoll/worker`)
   is the only "DOM" a worker sees; every mutation must serialize to an op.
   `document` in worker code resolves through the instance dispatcher —
   never assume ambient globals.

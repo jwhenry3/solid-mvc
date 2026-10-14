@@ -1,5 +1,5 @@
-import type { ComponentChildren } from 'preact';
-import { useEffect } from 'preact/hooks';
+import type { JSX } from 'solid-js';
+import { For, onMount } from 'solid-js';
 import { SiteHeader } from './components/SiteHeader';
 import { docHref, setRouteDepth } from './link';
 import { metaFor } from './routeMeta';
@@ -29,7 +29,7 @@ import { Hosting } from './pages/Hosting';
 interface Route {
   id: string;
   label: string;
-  page: () => ComponentChildren;
+  page: () => JSX.Element;
 }
 
 const SECTIONS: { label: string; routes: Route[] }[] = [
@@ -118,12 +118,12 @@ export function App({ route }: { route?: string }) {
   // (dist/index.html), so depth 0.
   setRouteDepth(shown.id === 'overview' ? 0 : 1);
 
-  useEffect(() => {
+  onMount(() => {
     document.title = notFound
-      ? 'PreactMVC docs, page not found'
+      ? 'SolidMVC docs, page not found'
       : metaFor(shown.id, shown.label).title;
     // Keep the active link in view: mirrors the same reveal in docs.js for
-    // the prerendered site (which runs no Preact).
+    // the prerendered site (which runs no Solid runtime).
     const sidebar = document.querySelector('.sidebar');
     const activeLink = sidebar?.querySelector<HTMLElement>('.nav-link.active');
     if (sidebar && activeLink) {
@@ -133,27 +133,30 @@ export function App({ route }: { route?: string }) {
         sidebar.scrollTop += ar.top - sb.top - sb.height / 3;
       }
     }
-  }, [shown.id, shown.label, notFound]);
+  });
 
   return (
     <div class="shell">
       <SiteHeader />
       <div class="shell-body">
         <aside class="sidebar">
-          {SECTIONS.map((section) => (
-            <nav key={section.label} class="nav-section">
-              <h3>{section.label}</h3>
-              {section.routes.map((r) => (
-                <a
-                  key={r.id}
-                  href={docHref(r.id)}
-                  class={r.id === active?.id ? 'nav-link active' : 'nav-link'}
-                >
-                  {r.label}
-                </a>
-              ))}
-            </nav>
-          ))}
+          <For each={SECTIONS}>
+            {(section) => (
+              <nav class="nav-section">
+                <h3>{section.label}</h3>
+                <For each={section.routes}>
+                  {(r) => (
+                    <a
+                      href={docHref(r.id)}
+                      class={r.id === active?.id ? 'nav-link active' : 'nav-link'}
+                    >
+                      {r.label}
+                    </a>
+                  )}
+                </For>
+              </nav>
+            )}
+          </For>
         </aside>
         <main class="content">
           {notFound ? (
@@ -171,7 +174,7 @@ export function App({ route }: { route?: string }) {
             shown.page()
           )}
           <footer class="site-footer">
-            <span>PreactMVC — MIT licensed</span>
+            <span>SolidMVC — MIT licensed</span>
           </footer>
         </main>
       </div>

@@ -6,14 +6,15 @@ export function Signals() {
     <article>
       <h1>Signals &amp; effects</h1>
       <p class="lead">
-        Reactivity is <code>@preact/signals</code> underneath, wrapped so that
+        Reactivity is Solid's signal graph underneath, wrapped so that
         effects created inside an injection scope are disposed with it — the
-        piece that makes service-level <code>effect()</code> safe.
+        piece that makes service-level <code>effect()</code> safe. The API
+        keeps <code>.value</code> reads/writes over Solid primitives.
       </p>
 
       <h2>The primitives</h2>
       <CodeBlock
-        code={`import { signal, computed, effect, batch, untracked } from '@preact-mvc/core';
+        code={`import { signal, computed, effect, batch, untracked } from '@solid-mvc/core';
 
 const count = signal(0);
 const doubled = computed(() => count.value * 2);
@@ -78,14 +79,21 @@ export class ThemeService {
         function.
       </p>
 
-      <h2>Views subscribe through render()</h2>
+      <h2>Views subscribe inside JSX expressions</h2>
       <p>
-        A view's <code>render()</code> runs inside a tracked scope: any
-        signal read there — a service's, a controller's, its own — re-renders
-        that view on write. Nothing else re-renders; updates are fine-grained
-        by construction. Reads in event handlers and timers don't subscribe
-        (they're outside the tracked scope), so you never hit the
-        read-during-handler subscription traps hooks create.
+        A view's <code>render()</code> runs <strong>once</strong> — Solid's
+        model. Tracking happens where the JSX compiler wraps expressions in
+        computations: a signal read inside a JSX expression, attribute, or{' '}
+        <code>&lt;For&gt;</code>/<code>&lt;Show&gt;</code> updates exactly the
+        DOM that read it on write — no re-render, no vdom diff. A signal read
+        eagerly in the <code>render()</code> body (e.g. into a local
+        variable) is a snapshot and stays stale — move it inside the JSX.
+      </p>
+      <p>
+        Reads in event handlers and timers don't subscribe (they're outside
+        any computation), so you never hit the read-during-handler
+        subscription traps hooks create — timers can safely write signals and
+        the tracked DOM updates itself.
       </p>
       <blockquote>
         <p>

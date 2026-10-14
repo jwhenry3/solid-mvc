@@ -3,24 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="PreactMVC — Angular-style modules and DI, class-based JSX views on Preact, signal reactivity, and worker-rendered islands." />
+    <meta name="description" content="SolidMVC — Angular-style modules and DI, class-based JSX views on Solid, signal reactivity, and worker-rendered islands." />
     <meta name="color-scheme" content="dark light" />
     <meta name="theme-color" content="#673ab8" />
-    <link rel="canonical" href="https://jwhenry3.github.io/preact-mvc/" />
+    <link rel="canonical" href="https://jwhenry3.github.io/solid-mvc/" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="PreactMVC" />
-    <meta property="og:title" content="PreactMVC — modules, DI &amp; class views on Preact" />
-    <meta property="og:description" content="Angular-style modules and DI, class-based JSX views on Preact, signal reactivity, and worker-rendered islands." />
-    <meta property="og:url" content="https://jwhenry3.github.io/preact-mvc/" />
-    <meta property="og:image" content="https://jwhenry3.github.io/preact-mvc/social.png" />
+    <meta property="og:site_name" content="SolidMVC" />
+    <meta property="og:title" content="SolidMVC — modules, DI &amp; class views on Solid" />
+    <meta property="og:description" content="Angular-style modules and DI, class-based JSX views on Solid, signal reactivity, and worker-rendered islands." />
+    <meta property="og:url" content="https://jwhenry3.github.io/solid-mvc/" />
+    <meta property="og:image" content="https://jwhenry3.github.io/solid-mvc/social.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="PreactMVC — shield logo and wordmark" />
+    <meta property="og:image:alt" content="SolidMVC — shield logo and wordmark" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="PreactMVC — modules, DI &amp; class views on Preact" />
-    <meta name="twitter:description" content="Angular-style modules and DI, class-based JSX views on Preact, signal reactivity, and worker-rendered islands." />
-    <meta name="twitter:image" content="https://jwhenry3.github.io/preact-mvc/social.png" />
-    <title>PreactMVC — modules, DI and class views on Preact</title>
+    <meta name="twitter:title" content="SolidMVC — modules, DI &amp; class views on Solid" />
+    <meta name="twitter:description" content="Angular-style modules and DI, class-based JSX views on Solid, signal reactivity, and worker-rendered islands." />
+    <meta name="twitter:image" content="https://jwhenry3.github.io/solid-mvc/social.png" />
+    <title>SolidMVC — modules, DI and class views on Solid</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <style>
       :root {
@@ -54,7 +54,7 @@
       }
       a { color: inherit; }
 
-      /* ---- purple brand header (preactjs.com style) ---- */
+      /* ---- brand header (solidjs.com style) ---- */
       header {
         display: flex; align-items: center; gap: 6px;
         height: 56px; padding: 0 20px;
@@ -77,7 +77,7 @@
 
       main { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
-      /* ---- centered hero (preactjs.com intro) ---- */
+      /* ---- centered hero (solidjs.com intro) ---- */
       .hero { text-align: center; padding: 84px 0 30px; }
       .hero .mark { height: 148px; width: auto; }
       .hero h1 {
@@ -190,14 +190,14 @@
   <body>
     <header>
       <a class="brand" href="./">
-        <img src="./logo-white.svg" alt="PreactMVC logo" />
-        <span class="name">PREACT<span>MVC</span></span>
+        <img src="./logo-white.svg" alt="SolidMVC logo" />
+        <span class="name">SOLID<span>MVC</span></span>
       </a>
       <nav>
         <a href="./docs/">Docs</a>
-        <a href="https://github.com/jwhenry3/preact-mvc">GitHub</a>
-        <a href="https://www.npmjs.com/org/preact-mvc">npm</a>
-        <a href="https://preactjs.com">Preact</a>
+        <a href="https://github.com/jwhenry3/solid-mvc">GitHub</a>
+        <a href="https://www.npmjs.com/org/solid-mvc">npm</a>
+        <a href="https://www.solidjs.com">Solid</a>
         <a href="https://angular.dev">Angular</a>
       </nav>
     </header>
@@ -205,15 +205,15 @@
     <main>
       <div class="hero">
         <img class="mark" src="./favicon.svg" alt="" />
-        <h1>Preact<span class="mvc">MVC</span></h1>
-        <p class="tagline">Angular's architecture on Preact — modules, DI, class views, and worker-rendered islands, with the whole Preact ecosystem on tap.</p>
+        <h1>Solid<span class="mvc">MVC</span></h1>
+        <p class="tagline">Angular's architecture on Solid — modules, DI, class views, and worker-rendered islands, with the whole Solid ecosystem on tap.</p>
         <p class="intro-buttons">
           <a class="btn primary" href="./docs/">Get started</a>
           <a class="btn secondary" href="./docs/enterprise/">See it live</a>
         </p>
         <div class="install">
           <span class="prompt">$</span>
-          <span id="cmd">npm install -g @preact-mvc/cli && pmvc new my-app</span>
+          <span id="cmd">npm install -g @solid-mvc/cli && smvc new my-app</span>
           <button id="copy" type="button">copy</button>
         </div>
       </div>
@@ -221,7 +221,7 @@
       <div class="code">
         <div class="bar"><i></i><i></i><i></i><span>counter.view.tsx</span></div>
         <pre><span class="tok-k">import</span> { Component, View, inject, signal, computed }
-  <span class="tok-k">from</span> <span class="tok-s">'@preact-mvc/core'</span>;
+  <span class="tok-k">from</span> <span class="tok-s">'@solid-mvc/core'</span>;
 
 <span class="tok-d">@Component</span>()
 <span class="tok-k">export class</span> <span class="tok-t">CounterView</span> <span class="tok-k">extends</span> <span class="tok-t">View</span> {
@@ -230,7 +230,7 @@
   count = signal(<span class="tok-n">0</span>);
   doubled = computed(<span class="tok-k">() =&gt;</span> <span class="tok-k">this</span>.count.value * <span class="tok-n">2</span>);
 
-  <span class="tok-c">// render() is plain JSX — signal reads re-render.</span>
+  <span class="tok-c">// render() runs once — JSX reads track the signal.</span>
   render() {
     <span class="tok-k">return</span> (
       <span class="tok-p">&lt;button</span> onClick={<span class="tok-k">() =&gt;</span> <span class="tok-k">this</span>.count.value++}<span class="tok-p">&gt;</span>
@@ -243,8 +243,8 @@
 
       <section>
         <p class="eyebrow">The convergence</p>
-        <h2 class="head">Angular's architecture, Preact's freedom</h2>
-        <img class="convergence" src="./preactmvc-convergence.png" alt="Angular strengths and trade-offs on one side, React and Preact strengths and trade-offs on the other, converging into PreactMVC: modules and dependency injection, MVC controllers and lifecycle, signal reactivity, JSX views on Preact, class views plus function components, and the pmvc CLI" />
+        <h2 class="head">Angular's architecture, Solid's freedom</h2>
+        <img class="convergence" src="./solidmvc-convergence.png" alt="Angular strengths and trade-offs on one side, SolidJS strengths and trade-offs on the other, converging into SolidMVC: modules and dependency injection, MVC controllers and lifecycle, signal reactivity, JSX views on SolidJS, class views plus function components, and the smvc CLI" />
       </section>
 
       <section>
@@ -278,7 +278,7 @@
         <p class="eyebrow">Live</p>
         <h2 class="head">Two demo apps, same packages</h2>
         <p class="sub">
-          Both mount from <code>@preact-mvc/*</code> by package name — the same
+          Both mount from <code>@solid-mvc/*</code> by package name — the same
           code the docs site documents and the test suite exercises.
         </p>
         <div class="grid">
@@ -296,7 +296,7 @@
       </section>
 
       <section>
-        <p class="eyebrow">Why PreactMVC</p>
+        <p class="eyebrow">Why SolidMVC</p>
         <h2 class="head">Structure without the template compiler</h2>
         <div class="grid">
           <div class="card">
@@ -304,12 +304,12 @@
             <p>Module ownership is enforced at mount: declared components refuse to mount outside their injector scope. Architecture you can't drift away from.</p>
           </div>
           <div class="card">
-            <h3>Every Preact library</h3>
-            <p><code>render()</code> is ordinary Preact vnodes — UI kits, hooks, <code>preact/compat</code>, TanStack Query, ECharts all drop in unchanged. Provide the client via DI; bridge <code>subscribe</code> into a signal.</p>
+            <h3>Every Solid library</h3>
+            <p><code>render()</code> is ordinary Solid JSX — UI kits, control flow, TanStack Query Core, ECharts all drop in unchanged. Provide the client via DI; bridge <code>subscribe</code> into a signal.</p>
           </div>
           <div class="card">
             <h3>Worker islands</h3>
-            <p>The same <code>View</code> classes render inside Web Workers via <code>@preact-mvc/atoll-island</code>, streamed to the shell DOM over an op protocol.</p>
+            <p>The same <code>View</code> classes render inside Web Workers via <code>@solid-mvc/atoll-island</code>, streamed to the shell DOM over an op protocol.</p>
           </div>
           <div class="card">
             <h3>Zero compiler magic</h3>
@@ -319,14 +319,13 @@
       </section>
 
       <div class="mission">
-        <strong>Mission: enterprise structure for the JSX era.</strong> PreactMVC
+        <strong>Mission: enterprise structure for the JSX era.</strong> SolidMVC
         keeps the parts of Angular that scaled — injectors, modules, declared
         ownership, MVC layering — and swaps the rest for signals and class-based
-        JSX on Preact. <code>inject()</code> replaces constructor metadata,
+        JSX on Solid. <code>inject()</code> replaces constructor metadata,
         signals replace change detection, and worker islands push real UI off
-        the main thread. And because views render as ordinary Preact vnodes,
-        the entire Preact ecosystem — and via <code>preact/compat</code>, much
-        of React's — drops in unchanged. Declare the scope once, and the view
+        the main thread. And because views render as ordinary Solid JSX,
+        the entire Solid ecosystem drops in unchanged. Declare the scope once, and the view
         tree respects it.
       </div>
 
@@ -339,27 +338,27 @@
             <p>Quickstart, DI and modules, views and controllers, signals, the router, and the worker-islands guide — with live embedded demos.</p>
             <span class="go">./docs/ →</span>
           </a>
-          <a class="card" href="https://github.com/jwhenry3/preact-mvc">
+          <a class="card" href="https://github.com/jwhenry3/solid-mvc">
             <h3>Source &amp; internals</h3>
             <p>The repo: packages, demo apps, and the internals docs — architecture map, DI invariants, and the islands op protocol.</p>
-            <span class="go">github.com/jwhenry3/preact-mvc →</span>
+            <span class="go">github.com/jwhenry3/solid-mvc →</span>
           </a>
-          <a class="card" href="https://www.npmjs.com/org/preact-mvc">
+          <a class="card" href="https://www.npmjs.com/org/solid-mvc">
             <h3>npm</h3>
-            <p><code>@preact-mvc/core</code> for the framework, <code>@preact-mvc/atoll</code> + <code>@preact-mvc/atoll-island</code> for worker islands.</p>
-            <span class="go">npmjs.com/org/preact-mvc →</span>
+            <p><code>@solid-mvc/core</code> for the framework, <code>@solid-mvc/atoll</code> + <code>@solid-mvc/atoll-island</code> for worker islands.</p>
+            <span class="go">npmjs.com/org/solid-mvc →</span>
           </a>
         </div>
       </section>
     </main>
 
     <footer>
-      <span>PreactMVC — MIT licensed.</span>
+      <span>SolidMVC — MIT licensed.</span>
       <span class="fill"></span>
-      <a href="https://github.com/jwhenry3/preact-mvc">GitHub</a>
-      <a href="https://github.com/jwhenry3/preact-mvc/issues">Issues</a>
-      <a href="https://www.npmjs.com/org/preact-mvc">npm</a>
-      <a href="https://preactjs.com">Preact</a>
+      <a href="https://github.com/jwhenry3/solid-mvc">GitHub</a>
+      <a href="https://github.com/jwhenry3/solid-mvc/issues">Issues</a>
+      <a href="https://www.npmjs.com/org/solid-mvc">npm</a>
+      <a href="https://www.solidjs.com">Solid</a>
       <a href="https://angular.dev">Angular</a>
       <a href="./docs/">Docs</a>
     </footer>

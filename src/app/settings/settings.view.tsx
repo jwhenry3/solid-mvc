@@ -1,5 +1,6 @@
-import { Component, View, inject, Router, RouterOutlet, Link } from '@preact-mvc/core';
-import { SlidersHorizontal, KeyRound } from 'lucide-preact';
+import { Component, View, inject, Router, RouterOutlet, Link } from '@solid-mvc/core';
+import SlidersHorizontal from 'lucide-solid/icons/sliders-horizontal';
+import KeyRound from 'lucide-solid/icons/key-round';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
 import { cn } from '@/lib/cn';
 
@@ -15,7 +16,6 @@ export class SettingsShellView extends View {
   private router = inject(Router);
 
   render() {
-    const url = this.router.url.value;
     return (
       <section class="max-w-3xl space-y-4">
         <Card>
@@ -35,7 +35,7 @@ export class SettingsShellView extends View {
                     to={s.to}
                     class={cn(
                       'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
-                      url === s.to
+                      this.router.url.value === s.to
                         ? 'bg-secondary text-secondary-foreground font-medium'
                         : 'text-muted-foreground hover:bg-accent',
                     )}

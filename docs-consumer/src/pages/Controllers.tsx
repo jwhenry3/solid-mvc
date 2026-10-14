@@ -14,7 +14,7 @@ export function Controllers() {
       <h2>MVC in practice</h2>
       <CodeBlock
         file="users.controller.ts"
-        code={`import { Controller, inject, signal } from '@preact-mvc/core';
+        code={`import { Controller, inject, signal } from '@solid-mvc/core';
 import { UsersApi } from './users.api';
 
 @Controller()
@@ -108,8 +108,8 @@ export class UsersView extends View {
 }`}
       />
       <p>
-        More on the hooks in <a href={docHref('context')}>Context &amp;
-        hooks</a>.
+        More on the helpers in{' '}
+        <a href={docHref('context')}>Context &amp; helpers</a>.
       </p>
     </article>
   );

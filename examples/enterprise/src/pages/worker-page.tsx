@@ -5,30 +5,37 @@
  * Boundary rules the props encode:
  * - theme is main-thread state (document/localStorage/matchMedia) — it
  *   crosses as props + a callbackProp setter.
- * - Signal reads in this component auto-subscribe the shell side; island
- *   props go over the wire as structured-cloneable values only.
+ * - Signal reads inside the props object stay reactive: <Island> diffs
+ *   props in an effect, so theme changes push updateProps over the wire.
+ * - Island props go over the wire as structured-cloneable values only.
  */
-import type { FunctionComponent } from 'preact';
-import { useService } from '@preact-mvc/core';
-import { Island, callbackProp } from '@preact-mvc/atoll-island';
+import type { Component } from 'solid-js';
+import { useService } from '@solid-mvc/core';
+import { Island, callbackProp } from '@solid-mvc/atoll-island';
 import { PageWorkerHost } from '@/services/page-worker.service';
 import { ThemeService, type Theme } from '@/services/theme.service';
 
-export const WorkerPage: FunctionComponent<{ app: string }> = ({ app }) => {
+export const WorkerPage: Component<{ app: string }> = (p) => {
   const host = useService(PageWorkerHost);
   const theme = useService(ThemeService);
-  const client = host.clientFor(app);
+  const client = host.clientFor(p.app);
 
-  const props: Record<string, unknown> = {};
-  if (app === 'dashboard') {
-    // Theme is main-thread state — the worker's view receives it as a prop
-    // and feeds it to the chart sub-island.
-    props.dark = theme.resolved.value === 'dark';
-  }
-  if (app === 'settings') {
-    props.theme = theme.theme.value;
-    props.onThemeChange = callbackProp((t: Theme) => (theme.theme.value = t));
-  }
-
-  return <Island client={client} app={app} props={props} />;
+  return (
+    <Island
+      client={client}
+      app={p.app}
+      props={{
+        // Reads happen inside Island's props-diffing effect — reactive.
+        ...(p.app === 'dashboard'
+          ? { dark: theme.resolved.value === 'dark' }
+          : {}),
+        ...(p.app === 'settings'
+          ? {
+              theme: theme.theme.value,
+              onThemeChange: callbackProp((t: Theme) => (theme.theme.value = t)),
+            }
+          : {}),
+      }}
+    />
+  );
 };

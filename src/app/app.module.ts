@@ -1,4 +1,4 @@
-import { Module, RouterModule } from '@preact-mvc/core';
+import { Module, RouterModule } from '@solid-mvc/core';
 import { AppShell } from './app.shell';
 import { routes } from './app.routes';
 import { API_URL, APP_TITLE } from './core/tokens';
