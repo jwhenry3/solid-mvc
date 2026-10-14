@@ -24,8 +24,8 @@
     "registry": "https://registry.npmjs.org"
   },
   "dependencies": {
-    "@atolljs/core": "^0.1.12",
-    "@atolljs/islands": "^0.1.12"
+    "@atolljs/core": "^0.1.13",
+    "@atolljs/islands": "^0.1.13"
   },
   "repository": {
     "type": "git",

@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@atolljs/core": "0.1.12",
+    "@atolljs/core": "0.1.13",
     "@solid-mvc/atoll": "file:../../packages/atoll",
     "@solid-mvc/atoll-island": "file:../../packages/atoll-island",
     "@solid-mvc/core": "file:../../packages/core",

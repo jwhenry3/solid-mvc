@@ -42,16 +42,11 @@ export default defineConfig({
         find: '@',
         replacement: r('./src'),
       },
-      {
-        // @atolljs/core ships dist/index.js for the bare specifier but raw
-        // src/* for subpaths. The islands package resolves the dist build
-        // while `@atolljs/core/testing/inProcessWorker` only exists in
-        // src — two realms, two TaskRegistry instances, and mounts fail
-        // with "Task handler not found". Alias the bare specifier into
-        // src so tests run a single module realm.
-        find: /^@atolljs\/core$/,
-        replacement: r('./node_modules/@atolljs/core/src/index.ts'),
-      },
+      // NB: @atolljs/core@>=0.1.13 resolves every subpath (including
+      // testing/inProcessWorker) to dist/, so bare and subpath imports
+      // share one realm — no alias needed. (Earlier versions mixed
+      // dist/index.js for the bare specifier with raw src/* subpaths:
+      // two realms, two TaskRegistry instances.)
       {
         // solid-js resolves to dist/server.js under the node/worker
         // conditions — the SSR build where effects never re-run. Pin the

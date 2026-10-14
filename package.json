@@ -36,6 +36,7 @@
     "url": "https://github.com/jwhenry3/solid-mvc"
   },
   "dependencies": {
+    "@atolljs/islands": "^0.1.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-solid": "1.49.0",
@@ -43,7 +44,7 @@
     "tailwind-merge": "^2.6.1"
   },
   "devDependencies": {
-    "@atolljs/core": "^0.1.12",
+    "@atolljs/core": "^0.1.13",
     "@babel/core": "^7.26.0",
     "@babel/plugin-proposal-decorators": "^7.29.7",
     "@babel/plugin-transform-class-properties": "^7.29.7",

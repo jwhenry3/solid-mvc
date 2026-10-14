@@ -26,8 +26,8 @@
     "solid-js": "^1.9.15"
   },
   "devDependencies": {
-    "@atolljs/core": "^0.1.12",
-    "@atolljs/islands": "^0.1.12",
+    "@atolljs/core": "^0.1.13",
+    "@atolljs/islands": "^0.1.13",
     "vite": "^6.0.0"
   },
   "publishConfig": {

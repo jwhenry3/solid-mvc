@@ -26,7 +26,7 @@ export const VERSIONS = {
   '@babel/core': '^7.26.0',
   '@babel/plugin-proposal-decorators': '^7.25.9',
   '@babel/plugin-transform-class-properties': '^7.25.9',
-  '@atolljs/core': '0.1.12',
+  '@atolljs/core': '0.1.13',
   typescript: '~5.5.0',
   vite: '^6.4.3',
   vitest: '^3.2.4',

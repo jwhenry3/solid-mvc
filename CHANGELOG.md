@@ -9,6 +9,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1]
+
+### `@solid-mvc/atoll` and `@solid-mvc/atoll-island`
+
+#### Changed
+
+- **`@atolljs/*` dependencies bumped to `^0.1.13`.** Upstream now ships
+  compiled JavaScript for every export — including
+  `@atolljs/islands`, `@atolljs/islands/worker`, and the
+  `@atolljs/core` subpaths such as `testing/inProcessWorker` — instead
+  of raw TypeScript inside `node_modules`. Consumers no longer need a
+  bundler that compiles `.ts` from dependencies to use the islands
+  runtime, and JS-only tooling (e.g. Bundlephobia) can resolve the
+  graph. `0.1.13` is the minimum supported Atoll version.
+
+### `@solid-mvc/cli`
+
+#### Changed
+
+- Scaffolded projects and `update` now pin `@atolljs/core` and
+  `@atolljs/islands` to `0.1.13`.
+
 ## [0.1.0]
 
 Initial release.
