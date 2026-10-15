@@ -1,5 +1,5 @@
 /**
- * `pmvc generate|g <schematic> <name>` — file generators, the `ng g`
+ * `smvc generate|g <schematic> <name>` — file generators, the `ng g`
  * equivalent. Schematics: view|component, controller, service, module,
  * island. Flags: --path <dir>, --skip-tests, -d/--dry-run, --force.
  */
@@ -104,7 +104,7 @@ export function cmdGenerate(a) {
     const deps = { ...found.pkg.dependencies, ...found.pkg.devDependencies };
     if (!deps['@solid-mvc/atoll-island']) {
       warn(
-        '@solid-mvc/atoll-island is not a dependency — run `pmvc add islands` first.',
+        '@solid-mvc/atoll-island is not a dependency — run `smvc add islands` first.',
       );
     }
   }

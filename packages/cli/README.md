@@ -18,9 +18,9 @@ npm install -g @solid-mvc/cli
 ## Create an app
 
 ```bash
-pmvc new my-app            # scaffold + npm install
-pmvc new my-app --islands  # + worker-island demo (contract + worker + route)
-pmvc new my-app --tailwind # + Tailwind v4 wiring
+smvc new my-app            # scaffold + npm install
+smvc new my-app --islands  # + worker-island demo (contract + worker + route)
+smvc new my-app --tailwind # + Tailwind v4 wiring
 cd my-app && smvc serve    # vite dev server
 ```
 
@@ -31,24 +31,24 @@ a shared island contract + worker entry.
 ## Generators — run inside a project
 
 ```bash
-pmvc g view my-page        # src/app/my-page/my-page.view.tsx (+ test)
-pmvc g controller orders   # <name>.controller.ts — @Controller view logic
-pmvc g service auth        # <name>.service.ts — @Injectable service
-pmvc g module admin        # feature module
-pmvc g island ticker       # contract + worker entry pair
+smvc g view my-page        # src/app/my-page/my-page.view.tsx (+ test)
+smvc g controller orders   # <name>.controller.ts — @Controller view logic
+smvc g service auth        # <name>.service.ts — @Injectable service
+smvc g module admin        # feature module
+smvc g island ticker       # contract + worker entry pair
 ```
 
 ## Build, dev, test
 
-`pmvc serve|dev`, `pmvc build` (`tsc --noEmit` + `vite build`), and
-`pmvc test` (`vitest run`) delegate to the project's own toolchain —
+`smvc serve|dev`, `smvc build` (`tsc --noEmit` + `vite build`), and
+`smvc test` (`vitest run`) delegate to the project's own toolchain —
 vite args pass through (`--watch`, `--no-typecheck`).
 
 ## Maintenance
 
-- `pmvc add tailwind | islands` — install + wire an integration into an
+- `smvc add tailwind | islands` — install + wire an integration into an
   existing project.
-- `pmvc update` — bump `@solid-mvc/*` deps (`--to <ver>`,
+- `smvc update` — bump `@solid-mvc/*` deps (`--to <ver>`,
   `--include-atoll` for `@atolljs/*`).
 
 The package is plain `.mjs` — no build step, ships `src/` directly.

@@ -1,5 +1,5 @@
 /**
- * `pmvc serve|build|test` — delegate to the project's vite/vitest, the
+ * `smvc serve|build|test` — delegate to the project's vite/vitest, the
  * `ng serve` / `ng build` / `ng test` equivalents. All args pass through
  * to the underlying tool except the few smvc owns (--watch for test,
  * --no-typecheck for build).
@@ -33,7 +33,7 @@ function execBin(pkg, argv, cwd) {
   return run('node', [join(cwd, 'node_modules', pkg, bin), ...argv], { cwd });
 }
 
-/** Strip pmvc-owned flags from a passthrough argv; returns {rest, had}. */
+/** Strip smvc-owned flags from a passthrough argv; returns {rest, had}. */
 function take(argv, flag) {
   const i = argv.indexOf(flag);
   return { rest: argv.filter((_, j) => j !== i), had: i !== -1 };

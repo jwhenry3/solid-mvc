@@ -1,5 +1,5 @@
 /**
- * `pmvc new <dir>` — scaffold a SolidMVC application, the `ng new`
+ * `smvc new <dir>` — scaffold a SolidMVC application, the `ng new`
  * equivalent. Flags: --islands, --tailwind, --skip-install,
  * --skip-tests, -d/--dry-run, --force (overwrite existing files).
  */
@@ -147,7 +147,7 @@ export function cmdNew(argv) {
 Done. Next:
 
   cd ${dir}
-  ${a['skip-install'] ? 'npm install\n  ' : ''}pmvc serve       # start the dev server
+  ${a['skip-install'] ? 'npm install\n  ' : ''}smvc serve       # start the dev server
   smvc g view my-page   # scaffold a new view
 `);
 }

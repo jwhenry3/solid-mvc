@@ -1,9 +1,9 @@
 /**
- * `pmvc update` — bump @solid-mvc/* dependencies, the `ng update`
+ * `smvc update` — bump @solid-mvc/* dependencies, the `ng update`
  * equivalent. Flags: --to <version>, --include-atoll, -d/--dry-run,
  * --skip-install.
  *
- * `pmvc add <recipe>` — install + wire an integration, the `ng add`
+ * `smvc add <recipe>` — install + wire an integration, the `ng add`
  * equivalent. Recipes: tailwind, islands.
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -31,7 +31,7 @@ function project() {
 /* ── update ───────────────────────────────────────────────────────── */
 
 // Future migrations: { to: 'x.y.z', run(root, pkg) {} }. When a release
-// needs a code mod, append an entry here — `pmvc update` applies every
+// needs a code mod, append an entry here — `smvc update` applies every
 // migration whose `to` is newer than the dep's current range.
 const MIGRATIONS = [];
 

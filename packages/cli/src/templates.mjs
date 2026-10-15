@@ -1,5 +1,5 @@
 /**
- * File templates for `pmvc new` and `pmvc generate`. Tokens use the
+ * File templates for `smvc new` and `smvc generate`. Tokens use the
  * %%UPPER_SNAKE%% form — safe inside JSX braces. Every template is
  * plain text; render() substitutes tokens and fails on leftovers.
  */
@@ -150,11 +150,11 @@ Angular-style modules, DI, and MVC on class-based JSX views rendered by
 Solid, with signal reactivity.
 
 \`\`\`bash
-pmvc serve      # dev server (vite)
-pmvc build      # production build
-pmvc test       # vitest
-pmvc g view my-page     # scaffold a view
-pmvc g module admin     # scaffold a feature module
+smvc serve      # dev server (vite)
+smvc build      # production build
+smvc test       # vitest
+smvc g view my-page     # scaffold a view
+smvc g module admin     # scaffold a feature module
 \`\`\`
 `;
 

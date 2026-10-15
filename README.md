@@ -33,7 +33,7 @@ unchanged.
 
 ```bash
 npm install -g @solid-mvc/cli   # the smvc binary
-pmvc new my-app --islands        # scaffold a routed app (+ worker islands)
+smvc new my-app --islands        # scaffold a routed app (+ worker islands)
 cd my-app && smvc serve
 ```
 

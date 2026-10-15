@@ -13,7 +13,7 @@ import { cmdNew } from './commands/new.mjs';
 import { cmdGenerate } from './commands/generate.mjs';
 import { cmdBuild, cmdServe, cmdTest } from './commands/run.mjs';
 import { cmdAdd, cmdUpdate } from './commands/update.mjs';
-const HELP = `pmvc — the SolidMVC CLI
+const HELP = `smvc — the SolidMVC CLI
 
 Usage: smvc <command> [args] [flags]
 
@@ -98,7 +98,7 @@ const COMMANDS = {
 };
 
 // serve/build/test pass ALL args through to vite/vitest — raw argv, not
-// parsed flags (a `--port 3000` belongs to vite, not pmvc).
+// parsed flags (a `--port 3000` belongs to vite, not smvc).
 const RAW_COMMANDS = { serve: cmdServe, dev: cmdServe, build: cmdBuild, test: cmdTest };
 
 const argv = process.argv.slice(2);

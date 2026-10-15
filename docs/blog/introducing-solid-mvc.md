@@ -77,7 +77,7 @@ Because the alternative is choosing between a framework that owns your codebase 
 
 ```bash
 npm install -g @solid-mvc/cli
-pmvc new my-app --islands
+smvc new my-app --islands
 cd my-app && smvc serve
 ```
 
