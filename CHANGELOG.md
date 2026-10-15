@@ -9,6 +9,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.2]
+
+### `@solid-mvc/cli`
+
+#### Fixed
+
+- **Command name in help, templates, and docs.** Scaffolded READMEs,
+  CLI help text, generators, and the consumer docs site still referred
+  to the old `pmvc` binary. They now use `smvc` (with `solid-mvc` as
+  the longer alias), matching the published `bin` entries.
+
 ## [0.1.1]
 
 ### `@solid-mvc/atoll` and `@solid-mvc/atoll-island`
