@@ -9,6 +9,57 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.3]
+
+### `@solid-mvc/core`
+
+#### Added
+
+- **Lazy routes.** `lazyView(loader)` / `lazyModule(loader)` wrap an
+  `import()` split point in a facade usable in route `component`/`module`
+  fields AND directly in JSX; `Route.loadComponent`/`loadChildren` are
+  the route-level equivalents, with `loadChildren` also resolving a
+  `Route[]` spliced in as children. Loaders resolve by metadata stamp:
+  `default` export first, then named exports scanned for `@Module`
+  classes, `@Component`/`View` classes, or route arrays. A resolved
+  module mounts its bootstrap view inside the module injector; a
+  resolved `Route[]` continues the match service-side when the chunk
+  lands (the wire matcher claims the tail under a splat route). The
+  import defers until first mount or match, resolution is cached, and
+  rejections log and render nothing at that depth.
+- **Componentless wrapper routes.** A route with no resolved `component`
+  passes its children straight through its frame instead of terminating
+  the chain, so lazy route trees and route groups need no shell view.
+- **Lazy loading states.** `router.pending` is a computed that is true
+  while any matched route resolves its chunk; `<RouterOutlet fallback>`
+  renders placeholder content at that depth while its target loads
+  (covering `loadComponent`, `lazyView`/`lazyModule` facades, and the
+  slot under a pending `loadChildren`). The facades accept the same
+  `fallback` prop for JSX use.
+
+### Tooling, docs, and site
+
+#### Fixed
+
+- **vitest 5 + vite-plugin-solid HMR injection.** `needHmr` is true under
+  vitest's serve-mode runner, and vitest 5's module runner cannot resolve
+  the injected `/@solid-refresh` specifier; both `solidPlugin()`
+  instances in `vitest.config.ts` now pass `hot: false`. The config also
+  imports `defineConfig` from `vitest/config` (the
+  `/// <reference types="vitest" />` augmentation no longer covers the
+  `test` key in vitest 5).
+
+#### Changed
+
+- **Dependency updates.** `vitest` and `@vitest/coverage-v8` bumped to
+  `^5.1.0` (clears the `@vitest/mocker` path-traversal/code-injection
+  advisories plus `glob`/`minimatch`/`test-exclude` transitives);
+  `vite` to `6.4.5` and `seroval` to `1.6.12` across all lockfiles
+  (`server.fs.deny` bypass, launch-editor Windows CVEs, code-injection
+  fixes). The enterprise example moves to `echarts ^6.1.0` (XSS fix)
+  and `zod ^4.6.7` (memory-exhaustion fix). `npm audit` reports zero
+  vulnerabilities in every package.
+
 ## [0.1.2]
 
 ### `@solid-mvc/cli`
