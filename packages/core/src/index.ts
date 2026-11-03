@@ -28,6 +28,10 @@ export { InjectorContext, useInjector, useService, Provide } from './context';
 export { useController } from './controller';
 export type { OnInit, OnDestroy } from './controller';
 
+// Lazy loading — usable in route configs and straight in JSX
+export { lazyView, lazyModule } from './lazy';
+export type { LazyResource, LazyResourceState } from './lazy';
+
 // Router
 export { Router, ROUTES, ROUTER_BASE, RouterModule, RouterOutlet, Link, defaultBasePath } from './router';
 export type { Route, RouteMatch, RouterOptions } from './router';

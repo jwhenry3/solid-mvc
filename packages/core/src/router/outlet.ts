@@ -15,6 +15,14 @@ export const OutletDepth = createContext(0);
  *  view can drop `<RouterOutlet/>` anywhere in its markup. */
 export const OutletChildren = createContext<() => JSX.Element>();
 
+/**
+ * The outlet's `fallback` prop, provided around the depth's content so a
+ * pending lazy target — a RouteFrame whose loadComponent is still in
+ * flight, or a loadChildren tail holding back deeper matches — can render
+ * it in place. The fallback lives on the outlet that owns the depth.
+ */
+export const OutletFallback = createContext<JSX.Element>(null);
+
 type DomRouterModule = typeof import('./router-dom');
 
 /**
@@ -26,22 +34,32 @@ type DomRouterModule = typeof import('./router-dom');
 let domRouter: Promise<DomRouterModule> | null = null;
 const loadDomRouter = () => (domRouter ??= import('./router-dom'));
 
-export function RouterOutlet(): JSX.Element {
+export function RouterOutlet(props: { fallback?: JSX.Element }): JSX.Element {
   const depth = useContext(OutletDepth);
   if (depth === 0) {
     // Root outlet: mount the router once the DOM-side module resolves —
-    // the tree appears a microtask after the outlet does.
+    // the tree appears a microtask after the outlet does. Route frames
+    // inside it read OutletFallback for their pending lazy targets.
     const router = useService(Router);
     const [DomRouter, setDomRouter] = createSignal<DomRouterModule['DomRouter'] | null>(null);
     void loadDomRouter().then((m) => setDomRouter(() => m.DomRouter));
-    return createMemo(() => {
-      const Mount = DomRouter();
-      return Mount ? createComponent(Mount, { router }) : null;
-    }) as unknown as JSX.Element;
+    return createComponent(OutletFallback.Provider, {
+      value: props.fallback ?? null,
+      get children() {
+        return createMemo(() => {
+          const Mount = DomRouter();
+          return Mount ? createComponent(Mount, { router }) : null;
+        }) as unknown as JSX.Element;
+      },
+    });
   }
   // Nested outlet: render the child element the router gave this route's
-  // frame. Wrapped in a memo so the accessor stays a reactive expression
-  // for the host renderer (same as the previous depth-indexed version).
+  // frame — a pending lazy child answers with our fallback instead.
   const child = useContext(OutletChildren);
-  return createMemo(() => child?.() ?? null) as unknown as JSX.Element;
+  return createComponent(OutletFallback.Provider, {
+    value: props.fallback ?? null,
+    get children() {
+      return createMemo(() => child?.() ?? null) as unknown as JSX.Element;
+    },
+  });
 }

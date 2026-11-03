@@ -1,6 +1,5 @@
-/// <reference types="vitest" />
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import solidPlugin from 'vite-plugin-solid';
 
 const r = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
@@ -25,11 +24,15 @@ export default defineConfig({
   plugins: [
     solidPlugin({
       include: WORKER_FILES,
+      // hot: false — HMR has no meaning in tests, and vitest 5's module
+      // runner can't resolve the injected /@solid-refresh specifier.
+      hot: false,
       solid: { generate: 'universal', moduleName: '@solid-mvc/atoll-island/worker' },
       babel: BABEL,
     }),
     solidPlugin({
       exclude: WORKER_FILES,
+      hot: false,
       solid: { moduleName: '@solid-mvc/core/web' },
       babel: BABEL,
     }),

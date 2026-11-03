@@ -3,11 +3,26 @@ import type { Location, Navigator, RouteMatch as WireRouteMatch } from '@solidjs
 import { computed, signal } from '../signals';
 import { Injectable } from '../decorators';
 import { InjectionToken } from '../injector';
+import { lazyRouteState, routePending } from './lazy';
 
 export interface Route {
   path: string;
   component?: any; // view function
   module?: any; // module class — its bootstrap component renders inside its injector
+  /**
+   * Lazy standalone component — a bundler split point. The loader resolves
+   * to a View class / @Component-stamped class / function component, picked
+   * from the module's default export or stamped named exports (or selected
+   * explicitly: `() => import('./x.view').then(m => m.XView)`).
+   */
+  loadComponent?: () => Promise<any>;
+  /**
+   * Lazy feature — resolves to an @Module class (its bootstrap view renders
+   * inside the module injector, like `module`) or a Route[] spliced in as
+   * this route's children. Matching reads the resolution signal, so the
+   * chain extends as soon as the chunk lands.
+   */
+  loadChildren?: () => Promise<any>;
   children?: Route[];
 }
 
@@ -60,12 +75,27 @@ function matchPrefix(
  * is exhausted (Angular semantics: `/users` renders the parent shell even
  * if it has children).
  */
-function matchSegments(routes: Route[], segs: string[]): RouteMatch[] | null {
+export function matchSegments(routes: Route[], segs: string[]): RouteMatch[] | null {
   for (const route of routes) {
     const m = matchPrefix(route.path, segs);
     if (m === null) continue;
-    if (route.children?.length) {
-      const child = matchSegments(route.children, m.rest);
+    let children = route.children;
+    let pending = false;
+    if (!children?.length && route.loadChildren) {
+      // Reading the resolution signal inside the matches computed does two
+      // things: kicks the loader, and subscribes this computed so the chain
+      // re-matches the moment a lazy Route[] lands.
+      const st = lazyRouteState(route).value;
+      if (st.status === 'loading') pending = true;
+      else if (st.status === 'ready') children = st.resolved.children;
+    }
+    if (pending) {
+      // Lazy children unresolved — the parent claims the URL alone until the
+      // chunk lands and the computed re-matches into the loaded tree.
+      return [{ route, params: m.params }];
+    }
+    if (children?.length) {
+      const child = matchSegments(children, m.rest);
       if (child !== null) return [{ route, params: m.params }, ...child];
       if (m.rest.length === 0) return [{ route, params: m.params }];
       continue;
@@ -83,6 +113,15 @@ function matchRoutes(routes: Route[], url: string): RouteMatch[] | null {
 /** Key under which each framework `Route` rides on its RouteDefinition's
  *  `info`, so wire matches can map back to the configured route. */
 export const ROUTE_INFO_KEY = 'smvcRoute';
+
+/**
+ * Marker `info` key on a loadChildren route's splat-tail def — the tail
+ * stands in for children the wire matcher cannot know until the chunk
+ * lands. Its captured remainder drives the service-side continuation.
+ */
+export const LAZY_TAIL_KEY = 'smvcLazyTail';
+/** The splat param name carrying the unmatched remainder under a lazy route. */
+export const LAZY_TAIL_PARAM = 'lazyRest';
 
 function decodeParams(params: Record<string, string | undefined>): Record<string, string> {
   const out: Record<string, string> = {};
@@ -120,6 +159,14 @@ export class Router {
   /** Params merged across the whole chain (inner levels win on collision). */
   params = computed(() =>
     Object.assign({}, ...(this.matches.value ?? []).map((m) => m.params)),
+  );
+  /**
+   * True while any route in the matched chain is still resolving its lazy
+   * chunk (loadComponent/loadChildren/lazyView/lazyModule) — parents read
+   * it to render loading UI anywhere above the outlet.
+   */
+  pending = computed(
+    () => !!this.matches.value?.some((m) => routePending(m.route)),
   );
 
   constructor(
@@ -220,12 +267,34 @@ export class Router {
     createEffect(() => {
       this.syncUrl(loc.pathname + loc.search);
       const wire = currentMatches();
-      this.wireMatches.value = wire.map((m) => ({
-        route: (m.route.info?.[ROUTE_INFO_KEY] as Route | undefined) ?? {
-          path: m.route.originalPath,
-        },
-        params: decodeParams(m.params),
-      }));
+      this.wireMatches.value = wire.flatMap((m) => {
+        const lazyRoute = m.route.info?.[LAZY_TAIL_KEY] as Route | undefined;
+        if (lazyRoute) {
+          // The lazy route's splat tail: resolve deeper matches with the
+          // service matcher once the chunk lands. Reading the resolution
+          // signal here subscribes this effect — the chain extends when it
+          // flips to 'ready'. While pending (or unmatched), the parent
+          // claims the URL alone.
+          const st = lazyRouteState(lazyRoute).value;
+          if (st.status === 'ready' && st.resolved.children?.length) {
+            const rest = m.params[LAZY_TAIL_PARAM] ?? '';
+            const sub = matchSegments(
+              st.resolved.children,
+              rest.split('/').filter(Boolean),
+            );
+            if (sub) return sub;
+          }
+          return [];
+        }
+        return [
+          {
+            route: (m.route.info?.[ROUTE_INFO_KEY] as Route | undefined) ?? {
+              path: m.route.originalPath,
+            },
+            params: decodeParams(m.params),
+          },
+        ];
+      });
     });
   }
 

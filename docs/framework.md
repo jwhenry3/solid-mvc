@@ -174,6 +174,54 @@ a leaf must consume the whole tail. Params merge across levels (inner
 wins). Module routes nest injectors the same way: the child's module
 injector parents under the level that mounted it.
 
+**Lazy routes** (`lazy.ts`, `router/lazy.ts`). Two surfaces share the
+same machinery:
+
+`lazyView(loader)` / `lazyModule(loader)` return facade components that
+work in routes AND straight in JSX. `lazyView` facades sit in a route's
+`component` field or mount anywhere (`<LazyHello/>` suspends on the
+import, then mounts the resolved view with the same props). `lazyModule`
+facades sit in `module` or `component` fields, or mount in JSX: the
+resolved module's bootstrap view renders inside the module injector.
+Both defer the import until first mount: creating the facade does not
+fetch the chunk.
+
+`Route.loadComponent` / `Route.loadChildren` are the route-level
+equivalents. `loadComponent` lazy-loads a standalone view; `loadChildren`
+lazy-loads a feature: an `@Module` class (bootstrap renders inside the
+module injector, the lazy form of `module`) or a `Route[]` spliced in as
+the route's children.
+
+All loaders resolve an ES-module namespace by metadata stamp, not
+convention: `default` export first, then named exports scanned for
+`__module` (modules), `__component`/`extends View`/`lazyView` facades
+(components), or an array (a `Route[]`). `.then(m => m.X)` short-circuits
+the scan.
+
+- `loadChildren` under the wire tree: the route's `RouteDefinition`
+  carries a splat-tail child (`*lazyRest` under `info.smvcLazyTail`) that
+  claims any deeper URL. While the chunk is in flight the tail expands to
+  nothing and the parent claims the URL alone; when the resolved `Route[]`
+  lands, the tail frame re-runs the service matcher over it and renders
+  the continued chain as nested route frames. `attachRouter` performs the
+  same expansion in `router.matches`, so `matches`/`params`/`pending`
+  reflect the loaded tree too. Standalone Routers get the same semantics
+  from `matchSegments` reading the resolution signal directly.
+- Resolution is cached: the first match or render kicks the loader,
+  repeat visits reuse it. A rejection logs
+  `[framework] lazy route '<path>' failed to load` (or
+  `lazyView`/`lazyModule failed to load` for facades) and renders
+  nothing at that depth.
+- A route with no resolved `component` is a componentless wrapper: its
+  wire children pass through, so lazy route trees need no shell view
+  unless you want one.
+- Loading state surfaces in two places: `router.pending` is a computed
+  true while any matched route is still resolving (shell-level loading
+  chrome reads it); `<RouterOutlet fallback={...}>` provides its value
+  through `OutletFallback` context, which a pending `RouteFrame`
+  (`loadComponent`, `lazyView`/`lazyModule` facade) or `LazyTailFrame`
+  (`loadChildren` holding deeper matches) renders in place.
+
 **Base path.** The router knows its mount prefix so the same bundle runs at
 site root or nested under a static tree (the Pages demos mount under
 `docs/demo/`). Resolution order: `RouterModule.forRoot(routes, { basePath })`
