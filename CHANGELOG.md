@@ -9,6 +9,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.4]
+
+### `@solid-mvc/core`
+
+#### Fixed
+
+- **`providedIn: 'root'` services can inject bootstrap-module
+  providers.** The root module's provider graph (including `forRoot`
+  bundles such as `RouterModule.forRoot`) now registers into the root
+  injector itself — Angular's eager-module semantics — instead of a
+  child app injector the root scope could not see. Root-scoped services
+  no longer fail with `No provider` when they `inject()` a
+  module-provided token; feature and lazy modules still get their own
+  child injectors.
+
 ## [0.1.3]
 
 ### `@solid-mvc/core`

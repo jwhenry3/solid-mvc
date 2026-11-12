@@ -6,8 +6,11 @@ import { viewComponent } from './view';
 import type { ModuleMeta } from './decorators';
 
 // Modules are the unit of provider scoping. A module's providers (plus those
-// of its imports, transitively) register into a single child Injector. The
-// injector tree mirrors the view tree: root injector -> AppModule injector ->
+// of its imports, transitively) register into a single Injector. The
+// bootstrap module registers into the ROOT injector itself — matching
+// Angular, where eager module providers share the root scope — so
+// providedIn: 'root' services can inject them. Only feature/lazy modules
+// get child injectors: root injector (holding the app module's graph) ->
 // feature/lazy module injectors -> per-view injectors.
 
 export function getModuleMeta(mod: any): ModuleMeta | undefined {
@@ -68,16 +71,19 @@ export function getModuleInjector(mod: any, parent: Injector): Injector {
  */
 export function bootstrap(RootModule: any, el: HTMLElement): () => void {
   const root = new Injector(null, 'root');
-  const appInjector = createModuleInjector(RootModule, root);
-  const meta = getModuleMeta(RootModule)!;
-  const App = meta.bootstrap?.[0];
+  // The bootstrapped module is eager: its providers and imports merge into
+  // the root injector, so providedIn: 'root' services (instantiated under
+  // root) can inject them — including forRoot() bundles like
+  // RouterModule.forRoot().
+  registerModule(RootModule, root, new Set());
+  const App = getModuleMeta(RootModule)!.bootstrap?.[0];
   if (!App) {
     throw new Error('Root module must declare a bootstrap component: @Module({ bootstrap: [AppView] })');
   }
   return render(
     () =>
       createComponent(InjectorContext.Provider, {
-        value: appInjector,
+        value: root,
         get children() {
           return createComponent(viewComponent(App), {});
         },
